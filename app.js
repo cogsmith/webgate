@@ -158,14 +158,17 @@ App.InitMap = function () {
 	LOG.DEBUG('App.InitMap');
 
 	let map = {
-		// ALL: 'HANGUP',
+		//ALL: 404
+		//ALL: 'PROXY',
+		//ALL: 'INFO',
 		ELSE: 404,
+		'google.com': 'PROXY',
 		'*/zx/px/port/9003': 'http://localhost:9003',
 		'*/zx/px/port/9006': 'http://localhost:9006',
 		'!/': 'INFO',
 		'!/favicon.ico': 'BACKEND',
 		'*/.well-known/': 'BACKEND',
-		'local.zxdns.net/': 'http://google.com',
+		//'local.zxdns.net/': 'http://google.com',
 		'example.com': '>https://en.wikipedia.org/wiki/Example.com',
 		'example.org': 'BACKEND',
 		'localhost': 'BACKEND',
@@ -184,7 +187,7 @@ App.InitMap = function () {
 
 	if (map['!']) { map['ELSE'] = map['!']; delete map['!']; }
 	if (map['*']) { map['ALL'] = map['*']; delete map['*']; }
-	if (map.ALL) { map = { ALL: map.ALL }; }
+	//if (map.ALL) { map = { ALL: map.ALL }; }
 
 	let mapcount = 0; let hostcount = 0;
 	let mapout = {}; let mapkeys = Object.keys(map);
@@ -301,11 +304,12 @@ App.InitProxyServer = function () {
 //
 
 App.ServerHander = function (req, res) {
-	if (req.socket.encrypted) { stype = 'HTTPS'; } else { stype = 'HTTP'; }
-
+	let stype = 'HTTP'; if (req.socket.encrypted) { stype = 'HTTPS'; } let stypelc=stype.toLowerCase();
+	
 	req.host = req.headers.host || 'NOHOST'; req.hostuc = req.host.toUpperCase();
 	req.ip = req.socket.remoteAddress;
 	req.admin = App.AdminIP.includes(req.ip) || false;
+	req.urlz = false; try { req.urlz = new URL(req.url); } catch (ex) { }
 
 	delete req.headers['X-Forwarded-For']; req.headers['x-forwarded-for'] = req.ip;
 
@@ -325,7 +329,11 @@ App.ServerHander = function (req, res) {
 
 	LOG.DEBUG({ REQ: { HOST: req.host, URL: req.url } });
 
-	let url = stype + '://' + req.host + req.url;
+	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { 
+		req.isforproxy = true; req.url = req.urlz.pathname; 
+	}
+
+	let url = stypelc + '://' + req.host + req.url;
 
 	LOG.TRACE(chalk.white(req.ip) + ' ' + req.method + ' ' + url, { Admin: req.admin, Open: { HTTP: App.Server.HTTP._connections, HTTPS: App.Server.HTTPS._connections } });
 	LOG.TRACE(chalk.white(req.ip) + ' ' + req.method + ' ' + url, { Admin: req.admin, Method: req.method, URL: url, Headers: req.headers });
@@ -344,6 +352,7 @@ App.ServerHander = function (req, res) {
 
 	let u = new URL(url); let uhost = u.host.toUpperCase();
 	let t = false;
+
 	if (mapout.ALL) { t = mapout.ALL; }
 
 	if (mapout.WILDCARD) {
@@ -367,16 +376,22 @@ App.ServerHander = function (req, res) {
 	if (!t) { t = mapout.ELSE; }
 	if (!t) { t = 'NOMAP'; }
 
+	if (req.isforproxy && t!='PROXY') { t=403; }
+
+	if (t=='OK') { t=200; }
+	if (t=='NOMAP') { t=404; }
+
 	// t = target;
-	LOG.DEBUG(chalk.white(req.ip) + ' ' + req.method + ' ' + u.href + chalk.white(' => ') + t + ((LOG.level == 'trace') ? "\n" : ''));
+	let logto = t; if (typeof t=='number') { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); }
+	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy?'PROXY ':'') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
 
 	if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
-	else if (t == 200 || t == 'OK') { res.statusCode = 200; res.end(); }
-	else if (t == 404 || t == 'NOMAP') { res.statusCode = 404; res.end(); }
+	// else if (req.isforproxy && t!='PROXY') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
 	else if (typeof (t) == 'number') { res.statusCode = t; res.end(); }
+	else if (t == 'PROXY') { App.Proxy.web(req, res, { target: req.url }); }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'INFO') {
-		try { res.end(req.method + ' ' + stype + '://' + req.headers.host + '' + req.url + "\n" + new Date().toISOString() + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
+		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
 	}
 	else if (t.startsWith('>')) {
 		t = t.substring(1);
@@ -463,7 +478,7 @@ App.MakeCert = function (domain) {
 }
 
 App.RequestCert = function (domain, cb) {
-	if (!cb) { cb = new function () { } }
+	if (!cb) { cb = function () { } }
 	domain = domain.toUpperCase(); let slug = App.GetHostSlug(domain);
 	if (App.CertReqs[domain]) { LOG.TRACE('RequestCert.AlreadySent: ' + domain); cb(null, Error('SNI:BUSY')); return; }
 	App.CertReqs[domain] = { DT: Date.now() };
