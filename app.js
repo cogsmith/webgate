@@ -304,8 +304,8 @@ App.InitProxyServer = function () {
 //
 
 App.ServerHander = function (req, res) {
-	let stype = 'HTTP'; if (req.socket.encrypted) { stype = 'HTTPS'; } let stypelc=stype.toLowerCase();
-	
+	let stype = 'HTTP'; if (req.socket.encrypted) { stype = 'HTTPS'; } let stypelc = stype.toLowerCase();
+
 	req.host = req.headers.host || 'NOHOST'; req.hostuc = req.host.toUpperCase();
 	req.ip = req.socket.remoteAddress;
 	req.admin = App.AdminIP.includes(req.ip) || false;
@@ -329,8 +329,8 @@ App.ServerHander = function (req, res) {
 
 	LOG.DEBUG({ REQ: { HOST: req.host, URL: req.url } });
 
-	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { 
-		req.isforproxy = true; req.url = req.urlz.pathname; 
+	if (req.url.startsWith('http://') || req.url.startsWith('https://')) {
+		req.isforproxy = true; req.url = req.urlz.pathname;
 	}
 
 	let url = stypelc + '://' + req.host + req.url;
@@ -376,18 +376,17 @@ App.ServerHander = function (req, res) {
 	if (!t) { t = mapout.ELSE; }
 	if (!t) { t = 'NOMAP'; }
 
-	if (req.isforproxy && t!='PROXY') { t=403; }
+	if (req.isforproxy && t != 'PROXY') { t = 403; }
 
-	if (t=='OK') { t=200; }
-	if (t=='NOMAP') { t=404; }
+	if (t == 'OK') { t = 200; }
+	if (t == 'NOMAP') { t = 404; }
 
 	// t = target;
-	let logto = t; if (typeof t=='number') { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); }
-	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy?'PROXY ':'') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
+	let logto = t; if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
+	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
 
 	if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
-	// else if (req.isforproxy && t!='PROXY') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
-	else if (typeof (t) == 'number') { res.statusCode = t; res.end(); }
+	else if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); }
 	else if (t == 'PROXY') { App.Proxy.web(req, res, { target: req.url }); }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'INFO') {
