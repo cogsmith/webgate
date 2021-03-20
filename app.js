@@ -387,7 +387,7 @@ App.ServerHander = function (req, res) {
 
 	if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
 	else if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); }
-	else if (t == 'PROXY') { App.Proxy.web(req, res, { target: req.url }); }
+	else if (t == 'PROXY') { LOG.WARN(req.url); App.Proxy.web(req, res, { target: u.href }); }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'INFO') {
 		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
