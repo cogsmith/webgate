@@ -167,7 +167,7 @@ App.InitMap = function () {
 		'example.com': 'HANGUP',
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
 
-		'myjuketube.com':'https://www.youtube.com',
+		'myjuketube.com':'https://www.youxube.com',
 
 		'*/zx/px/port/9001': 'http://' + App.PrivateIP + ':9001',
 		'*/zx/px/port/9002': 'http://' + App.PrivateIP + ':9002',
