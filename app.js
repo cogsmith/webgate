@@ -469,7 +469,7 @@ App.RequestCert = function (domain, cb) {
 	App.CertReqs[domain] = { DT: Date.now() };
 
 	let acmeCreate = async function (authz, challenge, key) { fs.writeFileSync(App.DataPath + '/' + '/WWW/.well-known/acme-challenge/' + challenge.token, key); }
-	let acmeRemove = async function (authz, challenge, key) { fs.rm(App.DataPath + '/' + '/WWW/.well-known/acme-challenge/' + challenge.token); }
+	let acmeRemove = async function (authz, challenge, key) { fs.rmSync(App.DataPath + '/' + '/WWW/.well-known/acme-challenge/' + challenge.token); }
 
 	var afx = async function () {
 		if (slug == 'LOCALHOST') { cb(null, App.GetCert(domain).Context); return; }
