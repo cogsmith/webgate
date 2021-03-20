@@ -161,19 +161,22 @@ App.InitMap = function () {
 		ELSE: 404,
 		'*/.well-known/': 'BACKEND',
 		'!/favicon.ico': 'BACKEND',
+		'!/teapot': 418,
+		'example.com': '>https://en.wikipedia.org/wiki/Example.com',
+
 		//ALL: 404
 		//ALL: 'PROXY',
 		//ALL: 'INFO',
 		//'google.com': 'PROXY',
-		'*/zx/px/port/9003': 'http://localhost:9003',
-		'*/zx/px/port/9006': 'http://localhost:9006',
+		//'*/zx/px/port/9003': 'http://localhost:9003',
+		//'*/zx/px/port/9006': 'http://localhost:9006',
 		//'test/': 'INFO',
-		'test/brew*': 418,
-		'*/brew': 418,
+		//'test/brew*': 418,
+		//'*/brew': 418,
 		//'local.zxdns.net/': 'http://google.com',
-		'example.com': '>https://en.wikipedia.org/wiki/Example.com',
-		'example.org': 'BACKEND',
-		'localhost': 'BACKEND',
+
+		//'example.org': 'BACKEND',
+		//'localhost': 'BACKEND',
 	};
 
 	maptest = {
@@ -367,7 +370,7 @@ App.ServerHander = function (req, res) {
 	}
 
 	if (map[uhost]) {
-		console.log('MAP:HOST: ' + uhost); console.log(map);
+		// console.log('MAP:HOST: ' + uhost); // console.log(map);
 		if (!t) { t = map[uhost]['*']; }
 		if (!t) { t = map[uhost][u.pathname]; }
 		if (!t) { let kz = Object.keys(map[uhost]); for (let i = 0; i < kz.length; i++) { let k = kz[i]; if (u.pathname != '/' && k.substr(-1) == '*' && u.pathname.startsWith(k.substr(0, k.length - 1))) { t = map[uhost][k]; } } }
@@ -401,8 +404,9 @@ App.ServerHander = function (req, res) {
 	else if (t.startsWith('>')) {
 		t = t.substring(1);
 		if (!t.includes(':')) { t = 'http://' + t };
-		res.writeHead(301, { Location: new URL(t).href });
-		res.end();
+		let loc = new URL(t).href;
+		res.writeHead(301, { Location: loc });
+		res.end(loc+"\n");
 	}
 	else {
 		if (!t.includes(':')) { t = 'http://' + t };
