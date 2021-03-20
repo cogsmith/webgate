@@ -159,7 +159,7 @@ App.InitMap = function () {
 
 	let map = {
 		ELSE: 404,
-		'*/.well-known/': 'BACKEND',
+		'*/.well-known/*': 'BACKEND',
 		'!/favicon.ico': 'BACKEND',
 		'!/teapot': 418,
 		'example.com': '>https://en.wikipedia.org/wiki/Example.com',
@@ -199,7 +199,7 @@ App.InitMap = function () {
 	for (let i = 0; i < mapkeys.length; i++) {
 		let k = mapkeys[i]; let v = map[k];
 
-		console.log('K=' + k);
+		//console.log('K=' + k);
 
 		let u = k;
 		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.TRACE('Proxy.Map: Adding Route: ALL => ' + v); }
@@ -218,7 +218,7 @@ App.InitMap = function () {
 			if (!k.includes(':')) { k = 'http://' + k };
 			let u = new URL(k); let up = u.pathname; let uh = u.host.toUpperCase();
 			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
-			console.log('KK=' + k);
+			//console.log('KK=' + k);
 			//if (k.substr(-1) == '/') { up = '/'; } else { if (k != u.protocol + '//' + uh + u.pathname) { up = '!'; } }
 			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: Redefined Route: ' + k + ' => ' + v); }
 			else { mapcount++; LOG.TRACE('Proxy.Map: Adding Route: HOST: ' + k + ' => ' + v); }
@@ -364,22 +364,23 @@ App.ServerHander = function (req, res) {
 
 	if (map.ALL) { t = map.ALL; }
 
+	
+
 	if (map.WILDCARD) {
 		if (!t) { t = map.WILDCARD[u.pathname]; }
-		if (!t) { let kz = Object.keys(map.WILDCARD); for (let i = 0; i < kz.length; i++) { let k = kz[i]; if (u.pathname != '/' && k.substr(-1) == '*' && u.pathname.startsWith(k.substr(0, k.length - 1))) { t = map.WILDCARD[k]; } } }
+		if (!t) { let kz = Object.keys(map.WILDCARD); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDCARD[k]; } } }
 	}
 
 	if (map[uhost]) {
-		// console.log('MAP:HOST: ' + uhost); // console.log(map);
 		if (!t) { t = map[uhost]['*']; }
 		if (!t) { t = map[uhost][u.pathname]; }
-		if (!t) { let kz = Object.keys(map[uhost]); for (let i = 0; i < kz.length; i++) { let k = kz[i]; if (u.pathname != '/' && k.substr(-1) == '*' && u.pathname.startsWith(k.substr(0, k.length - 1))) { t = map[uhost][k]; } } }
+		if (!t) { let kz = Object.keys(map[uhost]); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map[uhost][k]; } } }
 		if (!t) { t = map[uhost]['!']; }
 	}
 
 	if (map.WILDELSE) {
 		if (!t) { t = map.WILDELSE[u.pathname]; }
-		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; if (u.pathname != '/' && k.substr(-1) == '*' && u.pathname.startsWith(k.substr(0, k.length - 1))) { t = map.WILDELSE[k]; } } }
+		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDELSE[k]; } } }
 	}
 
 	if (!t) { t = map.ELSE; }
