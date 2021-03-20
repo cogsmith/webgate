@@ -1,5 +1,7 @@
 // process.on('uncaughtException', function (err) { console.log("\n"); console.log(err); console.log("\n"); process.exit(1); }); // throw(Error('ERROR'));
 
+//
+
 const util = require('util');
 const path = require('path');
 const fs = require('fs');
@@ -82,9 +84,9 @@ App.SetInfo('Node.Args', process.argv.join(' '));
 App.SetInfo('Node', require('os').hostname().toUpperCase() + ' : ' + process.pid + '/' + process.ppid + ' : ' + process.cwd() + ' : ' + process.version + ' : ' + require('os').version() + ' : ' + process.title);
 App.SetInfo('App', App.Meta.Full);
 
-let AppLogPretty = false; if (App.Args.logpretty) { AppLogPretty = { colorize: true, singleLine: true, translateTime: 'SYS:yyyy-mm-dd.HH:MM:ss', ignore: 'hostname,pid', messageFormat: function (log, key, label) { let msg = log.msg ? log.msg : ''; let logout = chalk.gray(App.Meta.NameTag); if (msg != '') { logout += ' ' + msg }; return logout; } }; }
-let AppLog = pino({ level: App.Args.loglevel, hooks: { logMethod: function (args, method) { if (args.length === 2) { args.reverse() } method.apply(this, args) } }, prettyPrint: AppLogPretty });
-const LOG = AppLog; App.Log = AppLog; LOG.TRACE = LOG.trace; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; LOG.FATAL = LOG.fatal;
+App.LogPretty = false; if (App.Args.logpretty) { App.LogPretty = { colorize: true, singleLine: true, translateTime: 'SYS:yyyy-mm-dd.HH:MM:ss', ignore: 'hostname,pid', messageFormat: function (log, key, label) { let msg = log.msg ? log.msg : ''; let logout = chalk.gray(App.Meta.NameTag); if (msg != '') { logout += ' ' + msg }; return logout; } }; }
+App.Log = pino({ level: App.Args.loglevel, hooks: { logMethod: function (args, method) { if (args.length === 2) { args.reverse() } method.apply(this, args) } }, prettyPrint: App.LogPretty });
+const LOG = App.Log; LOG.TRACE = LOG.trace; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; LOG.FATAL = LOG.fatal;
 if (App.Args.debuglogger) { LOG.TRACE('TRACE'); LOG.DEBUG('DEBUG'); LOG.INFO('INFO'); LOG.WARN('WARN'); LOG.ERROR('ERROR'); LOG.FATAL('FATAL'); App.Exit({ silent: true }); }
 if (App.Args.debugargs) { console.log("\n"); console.log(App.Args); console.log("\n"); App.Exit({ silent: true }); };
 if (App.Args.help) { AppArg.showHelp('log'); console.log("\n" + App.Info('Node') + "\n"); App.Exit({ silent: true }); }
@@ -245,7 +247,7 @@ App.GetSlugHost = function (slug) { let host = slug.replace(/_/g, '.'); let z = 
 App.InitBackend = function (cb) {
 	LOG.DEBUG('App.InitBackend');
 
-	App.Backend = { Endpoint: 'http://' + App.IP + ':' + App.Port, Fastify: fastify({ logger: AppLog, maxParamLength: 999, ignoreTrailingSlash: false, }) };
+	App.Backend = { Endpoint: 'http://' + App.IP + ':' + App.Port, Fastify: fastify({ logger: App.Log, maxParamLength: 999, ignoreTrailingSlash: false, }) };
 
 	let ff = App.Backend.Fastify;
 	ff.register(fastify_compress);
@@ -321,7 +323,7 @@ App.ServerHander = function (req, res) {
 
 	let to = toip;
 
-	LOG.DEBUG({REQ:{HOST:req.host,URL:req.url}});
+	LOG.DEBUG({ REQ: { HOST: req.host, URL: req.url } });
 
 	let url = stype + '://' + req.host + req.url;
 
@@ -467,7 +469,7 @@ App.RequestCert = function (domain, cb) {
 	App.CertReqs[domain] = { DT: Date.now() };
 
 	let acmeCreate = async function (authz, challenge, key) { fs.writeFileSync(App.DataPath + '/' + '/WWW/.well-known/acme-challenge/' + challenge.token, key); }
-	let acmeRemove = async function (authz, challenge, key) { }
+	let acmeRemove = async function (authz, challenge, key) { fs.rm(App.DataPath + '/' + '/WWW/.well-known/acme-challenge/' + challenge.token); }
 
 	var afx = async function () {
 		if (slug == 'LOCALHOST') { cb(null, App.GetCert(domain).Context); return; }

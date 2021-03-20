@@ -3,13 +3,13 @@
 
 ---
 
-:octocat: https://github.com/cogsmith/zx-proxy
+:octocat: https://github.com/cogsmith/hive-proxy
 
-🐳 https://hub.docker.com/r/cogsmith/zx-proxy
+🐳 https://hub.docker.com/r/cogsmith/hive-proxy
 
 ---
 
-<h1><code><a href='https://github.com/cogsmith/zx-proxy/blob/main/app.js'>📄 [VIEW APP SOURCE CODE]</a></code></h1>
+<h1><code><a href='https://github.com/cogsmith/hive-proxy/blob/main/app.js'>📄 [VIEW APP SOURCE CODE]</a></code></h1>
 
 ---
 
