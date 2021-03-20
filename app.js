@@ -167,12 +167,12 @@ App.InitMap = function () {
 		'example.com': 403,
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
 
-		'*/zx/px/port/9001': 'http://localhost:9001',
-		'*/zx/px/port/9002': 'http://localhost:9002',
-		'*/zx/px/port/9003': 'http://localhost:9003',
-		'*/zx/px/port/9004': 'http://localhost:9004',
-		'*/zx/px/port/9005': 'http://localhost:9005',
-		'*/zx/px/port/9006': 'http://localhost:9006',
+		'*/zx/px/port/9001': 'http://'+App.PrivateIP+':9001',
+		'*/zx/px/port/9002': 'http://'+App.PrivateIP+':9002',
+		'*/zx/px/port/9003': 'http://'+App.PrivateIP+':9003',
+		'*/zx/px/port/9004': 'http://'+App.PrivateIP+':9004',
+		'*/zx/px/port/9005': 'http://'+App.PrivateIP+':9005',
+		'*/zx/px/port/9006': 'http://'+App.PrivateIP+':9006',
 	};
 
 	map['/_/zx/px/*'] = 'BACKEND';
