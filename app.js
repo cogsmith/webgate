@@ -158,16 +158,18 @@ App.InitMap = function () {
 	LOG.DEBUG('App.InitMap');
 
 	let map = {
+		ELSE: 404,
+		'*/.well-known/': 'BACKEND',
+		'!/favicon.ico': 'BACKEND',
 		//ALL: 404
 		//ALL: 'PROXY',
 		//ALL: 'INFO',
-		ELSE: 404,
-		'google.com': 'PROXY',
+		//'google.com': 'PROXY',
 		'*/zx/px/port/9003': 'http://localhost:9003',
 		'*/zx/px/port/9006': 'http://localhost:9006',
-		'!/': 'INFO',
-		'!/favicon.ico': 'BACKEND',
-		'*/.well-known/': 'BACKEND',
+		//'test/': 'INFO',
+		'test/brew*': 418,
+		'*/brew': 418,
 		//'local.zxdns.net/': 'http://google.com',
 		'example.com': '>https://en.wikipedia.org/wiki/Example.com',
 		'example.org': 'BACKEND',
@@ -194,6 +196,8 @@ App.InitMap = function () {
 	for (let i = 0; i < mapkeys.length; i++) {
 		let k = mapkeys[i]; let v = map[k];
 
+		console.log('K=' + k);
+
 		let u = k;
 		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.TRACE('Proxy.Map: Adding Route: ALL => ' + v); }
 		else if (k == 'ELSE') { mapout['ELSE'] = v; mapcount++; LOG.TRACE('Proxy.Map: Adding Route: ELSE => ' + v); }
@@ -211,7 +215,8 @@ App.InitMap = function () {
 			if (!k.includes(':')) { k = 'http://' + k };
 			let u = new URL(k); let up = u.pathname; let uh = u.host.toUpperCase();
 			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
-			if (k.substr(-1) == '/') { up = '/'; } else { if (k != u.protocol + '//' + uh + u.pathname) { up = '!'; } }
+			console.log('KK=' + k);
+			//if (k.substr(-1) == '/') { up = '/'; } else { if (k != u.protocol + '//' + uh + u.pathname) { up = '!'; } }
 			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: Redefined Route: ' + k + ' => ' + v); }
 			else { mapcount++; LOG.TRACE('Proxy.Map: Adding Route: HOST: ' + k + ' => ' + v); }
 			mapout[uh][up] = v;
@@ -266,7 +271,7 @@ App.InitBackend = function (cb) {
 	})
 
 	//ff.setNotFoundHandler((req,rep) => { rep.redirect('/404'); });
-	ff.setNotFoundHandler((req, rep) => { rep.code(404).send('404'); });
+	ff.setNotFoundHandler((req, rep) => { rep.code(404).send('Z404'); });
 
 	ff.get('/', (req, rep) => { rep.send(App.Meta.Name); });
 
@@ -348,32 +353,33 @@ App.ServerHander = function (req, res) {
 	if (req.url.startsWith('/blog')) { req.url = req.url.substr(5); target = 'http://' + toip + ':9001'; }
 	else if (req.url.startsWith('/blog/')) { req.url = req.url.substr(6); target = 'http://' + toip + ':9001'; }
 
-	let mapout = App.Map;
+
+	let map = App.Map;
 
 	let u = new URL(url); let uhost = u.host.toUpperCase();
 	let t = false;
 
-	if (mapout.ALL) { t = mapout.ALL; }
+	if (map.ALL) { t = map.ALL; }
 
-	if (mapout.WILDCARD) {
-		if (!t) { t = mapout.WILDCARD[u.pathname]; }
-		if (!t) { let kz = Object.keys(mapout.WILDCARD); for (let i = 0; i < kz.length; i++) { let k = kz[i]; console.log(k); if (u.pathname.startsWith(k)) { t = mapout.WILDCARD[k]; } } }
+	if (map.WILDCARD) {
+		if (!t) { t = map.WILDCARD[u.pathname]; }
+		if (!t) { let kz = Object.keys(map.WILDCARD); for (let i = 0; i < kz.length; i++) { let k = kz[i]; if (u.pathname != '/' && k.substr(-1) == '*' && u.pathname.startsWith(k.substr(0, k.length - 1))) { t = map.WILDCARD[k]; } } }
 	}
 
-	if (mapout[uhost]) {
-		console.log('MAP: ' + uhost);
-		if (!t) { t = mapout[uhost]['*']; }
-		if (!t) { t = mapout[uhost][u.pathname]; }
-		if (!t) { let kz = Object.keys(mapout[uhost]); for (let i = 0; i < kz.length; i++) { let k = kz[i]; console.log(k); if (u.pathname.startsWith(k)) { t = mapout[uhost][k]; } } }
-		if (!t) { t = mapout[uhost]['!']; }
+	if (map[uhost]) {
+		console.log('MAP:HOST: ' + uhost); console.log(map);
+		if (!t) { t = map[uhost]['*']; }
+		if (!t) { t = map[uhost][u.pathname]; }
+		if (!t) { let kz = Object.keys(map[uhost]); for (let i = 0; i < kz.length; i++) { let k = kz[i]; if (u.pathname != '/' && k.substr(-1) == '*' && u.pathname.startsWith(k.substr(0, k.length - 1))) { t = map[uhost][k]; } } }
+		if (!t) { t = map[uhost]['!']; }
 	}
 
-	if (mapout.WILDELSE) {
-		if (!t) { t = mapout.WILDELSE[u.pathname]; }
-		if (!t) { let kz = Object.keys(mapout.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; console.log(k); if (u.pathname.startsWith(k)) { t = mapout.WILDELSE[k]; } } }
+	if (map.WILDELSE) {
+		if (!t) { t = map.WILDELSE[u.pathname]; }
+		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; if (u.pathname != '/' && k.substr(-1) == '*' && u.pathname.startsWith(k.substr(0, k.length - 1))) { t = map.WILDELSE[k]; } } }
 	}
 
-	if (!t) { t = mapout.ELSE; }
+	if (!t) { t = map.ELSE; }
 	if (!t) { t = 'NOMAP'; }
 
 	if (req.isforproxy && t != 'PROXY') { t = 403; }
@@ -403,6 +409,7 @@ App.ServerHander = function (req, res) {
 		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
 	}
 }
+
 
 //
 
