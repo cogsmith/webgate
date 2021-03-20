@@ -1,0 +1,37 @@
+{
+	"version": "0.1.0",
+	"namelong": "WEBGATE",
+	"nametag": "WEBGATE",
+	"name": "zx-proxy",
+	"description": "Automagical Proxy Server",
+	"keywords": [],
+	"homepage": "https://cogsmith.com/project/0",
+	"license": "http://cogsmith.com/license/public",
+	"repository": "github:cogsmith/zx-proxy",
+	"private": true,
+	"author": {
+		"name": "David Adam Coffey",
+		"email": "dac@cogsmith.com",
+		"url": "http://david-adam-coffey.com"
+	},
+	"main": "app.js",
+	"scripts": {
+		"dev": "nodemon app.js",
+		"start": "node app.js"
+	},
+	"dependencies": {
+		"acme-client": "^4.1.3",
+		"axios": "^0.21.1",
+		"chalk": "^4.1.0",
+		"fastify": "^3.12.0",
+		"fastify-compress": "^3.4.1",
+		"fastify-http-proxy": "^5.0.0",
+		"fastify-static": "^4.0.1",
+		"http-proxy": "^1.18.1",
+		"lodash": "^4.17.21",
+		"nconf": "^0.11.2",
+		"node-forge": "^0.10.0",
+		"pino-pretty": "^4.7.1",
+		"yargs": "^16.2.0"
+	}
+}
