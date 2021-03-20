@@ -158,39 +158,24 @@ App.InitMap = function () {
 	LOG.DEBUG('App.InitMap');
 
 	let map = {
+		//ALL: 'PROXY',
+		//ALL: 'HANGUP',
 		ELSE: 404,
 		'*/.well-known/*': 'BACKEND',
 		'!/favicon.ico': 'BACKEND',
 		'!/teapot': 418,
 		'example.com': 403,
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
-		'example.com/hangup/*': 'HANGUP',
 
-		//ALL: 404
-		//ALL: 'PROXY',
-		//ALL: 'INFO',
-		//'google.com': 'PROXY',
-		//'*/zx/px/port/9003': 'http://localhost:9003',
-		//'*/zx/px/port/9006': 'http://localhost:9006',
-		//'test/': 'INFO',
-		//'test/brew*': 418,
-		//'*/brew': 418,
-		//'local.zxdns.net/': 'http://google.com',
-
-		//'example.org': 'BACKEND',
-		//'localhost': 'BACKEND',
+		'*/zx/px/port/9001': 'http://localhost:9001',
+		'*/zx/px/port/9002': 'http://localhost:9002',
+		'*/zx/px/port/9003': 'http://localhost:9003',
+		'*/zx/px/port/9004': 'http://localhost:9004',
+		'*/zx/px/port/9005': 'http://localhost:9005',
+		'*/zx/px/port/9006': 'http://localhost:9006',
 	};
 
-	maptest = {
-		//'*': 'http://localhost:1',
-		//'!': 'http://localhost:2',
-		//'*/*': 'http://localhost:3',
-		//'*/!': 'http://localhost:4',
-		//'!/*': 'http://localhost:5',
-		//'!/!': 'http://localhost:6',
-		//'LOCALHOST/': 'http://localhost:10',
-		//LOCALHOST: 'http://localhost:9',
-	};
+	map['/_/zx/px/*'] = 'BACKEND';
 
 	if (map['!']) { map['ELSE'] = map['!']; delete map['!']; }
 	if (map['*']) { map['ALL'] = map['*']; delete map['*']; }
@@ -201,9 +186,11 @@ App.InitMap = function () {
 	for (let i = 0; i < mapkeys.length; i++) {
 		let k = mapkeys[i]; let v = map[k];
 
+		if (k.startsWith('/')) { k = '*' + k; }
 		console.log('K=' + k);
 
 		let u = k;
+
 		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.TRACE('Proxy.Map: Adding Route: ALL => ' + v); }
 		else if (k == 'ELSE') { mapout['ELSE'] = v; mapcount++; LOG.TRACE('Proxy.Map: Adding Route: ELSE => ' + v); }
 		else if (k.startsWith('*')) {
@@ -217,7 +204,7 @@ App.InitMap = function () {
 			mapcount++; LOG.TRACE('Proxy.Map: Adding Route: WILDELSE: ' + k + ' => ' + v);
 		}
 		else {
-			let kk=k; if (!k.includes(':')) { kk = 'http://' + k };
+			let kk = k; if (!k.includes(':')) { kk = 'http://' + k };
 			let u = new URL(kk); let up = u.pathname; let uh = u.host.toUpperCase();
 			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
 			if (!k.includes('/')) { up = '!'; }
