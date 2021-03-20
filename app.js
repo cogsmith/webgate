@@ -160,22 +160,23 @@ App.InitMap = function () {
 	let map = {
 		//ALL: 'PROXY',
 		//ALL: 'HANGUP',
+		NOHOST: 403,
 		ELSE: 404,
 		'*/.well-known/*': 'BACKEND',
 		'!/favicon.ico': 'BACKEND',
 		'!/teapot': 418,
-		'example.com': 403,
+		'example.com': 500,
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
 
-		'*/zx/px/port/9001': 'http://'+App.PrivateIP+':9001',
-		'*/zx/px/port/9002': 'http://'+App.PrivateIP+':9002',
-		'*/zx/px/port/9003': 'http://'+App.PrivateIP+':9003',
-		'*/zx/px/port/9004': 'http://'+App.PrivateIP+':9004',
-		'*/zx/px/port/9005': 'http://'+App.PrivateIP+':9005',
-		'*/zx/px/port/9006': 'http://'+App.PrivateIP+':9006',
-		'*/zx/px/port/9007': 'http://'+App.PrivateIP+':9007',
-		'*/zx/px/port/9008': 'http://'+App.PrivateIP+':9008',
-		'*/zx/px/port/9009': 'http://'+App.PrivateIP+':9009',		
+		'*/zx/px/port/9001': 'http://' + App.PrivateIP + ':9001',
+		'*/zx/px/port/9002': 'http://' + App.PrivateIP + ':9002',
+		'*/zx/px/port/9003': 'http://' + App.PrivateIP + ':9003',
+		'*/zx/px/port/9004': 'http://' + App.PrivateIP + ':9004',
+		'*/zx/px/port/9005': 'http://' + App.PrivateIP + ':9005',
+		'*/zx/px/port/9006': 'http://' + App.PrivateIP + ':9006',
+		'*/zx/px/port/9007': 'http://' + App.PrivateIP + ':9007',
+		'*/zx/px/port/9008': 'http://' + App.PrivateIP + ':9008',
+		'*/zx/px/port/9009': 'http://' + App.PrivateIP + ':9009',
 	};
 
 	map['/_/zx/px/*'] = 'BACKEND';
@@ -312,8 +313,8 @@ App.ServerHander = function (req, res) {
 	req.urlz = false; try { req.urlz = new URL(req.url); } catch (ex) { }
 
 	delete req.headers['X-Forwarded-For']; req.headers['x-forwarded-for'] = req.ip;
-	delete req.headers['X-Forwarded-Host']; req.headers['x-forwarded-host'] = req.host;
-	delete req.headers['X-Forwarded-Proto']; req.headers['x-forwarded-proto'] = stypelc;
+	//delete req.headers['X-Forwarded-Host']; req.headers['x-forwarded-host'] = req.host;
+	//delete req.headers['X-Forwarded-Proto']; req.headers['x-forwarded-proto'] = stypelc;
 
 	App.Stats.Hits.Total[stype]++;
 	if (!App.Stats.Hits.Host[req.hostuc]) { App.Stats.Hits.Host[req.hostuc] = 1 } else { App.Stats.Hits.Host[req.hostuc]++ }
