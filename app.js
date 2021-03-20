@@ -162,7 +162,9 @@ App.InitMap = function () {
 		'*/.well-known/*': 'BACKEND',
 		'!/favicon.ico': 'BACKEND',
 		'!/teapot': 418,
-		'example.com': '>https://en.wikipedia.org/wiki/Example.com',
+		'example.com': 403,
+		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
+		'example.com/hangup': 'HANGUP',
 
 		//ALL: 404
 		//ALL: 'PROXY',
@@ -199,7 +201,7 @@ App.InitMap = function () {
 	for (let i = 0; i < mapkeys.length; i++) {
 		let k = mapkeys[i]; let v = map[k];
 
-		//console.log('K=' + k);
+		console.log('K=' + k);
 
 		let u = k;
 		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.TRACE('Proxy.Map: Adding Route: ALL => ' + v); }
@@ -215,13 +217,13 @@ App.InitMap = function () {
 			mapcount++; LOG.TRACE('Proxy.Map: Adding Route: WILDELSE: ' + k + ' => ' + v);
 		}
 		else {
-			if (!k.includes(':')) { k = 'http://' + k };
-			let u = new URL(k); let up = u.pathname; let uh = u.host.toUpperCase();
+			let kk=k; if (!k.includes(':')) { kk = 'http://' + k };
+			let u = new URL(kk); let up = u.pathname; let uh = u.host.toUpperCase();
 			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
-			//console.log('KK=' + k);
+			if (!k.includes('/')) { up = '!'; }
 			//if (k.substr(-1) == '/') { up = '/'; } else { if (k != u.protocol + '//' + uh + u.pathname) { up = '!'; } }
-			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: Redefined Route: ' + k + ' => ' + v); }
-			else { mapcount++; LOG.TRACE('Proxy.Map: Adding Route: HOST: ' + k + ' => ' + v); }
+			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: Redefined Route: ' + kk + ' => ' + v); }
+			else { mapcount++; LOG.TRACE('Proxy.Map: Adding Route: HOST: ' + kk + ' => ' + v); }
 			mapout[uh][up] = v;
 		}
 	}
@@ -364,7 +366,7 @@ App.ServerHander = function (req, res) {
 
 	if (map.ALL) { t = map.ALL; }
 
-	
+
 
 	if (map.WILDCARD) {
 		if (!t) { t = map.WILDCARD[u.pathname]; }
@@ -407,7 +409,7 @@ App.ServerHander = function (req, res) {
 		if (!t.includes(':')) { t = 'http://' + t };
 		let loc = new URL(t).href;
 		res.writeHead(301, { Location: loc });
-		res.end(loc+"\n");
+		res.end(loc + "\n");
 	}
 	else {
 		if (!t.includes(':')) { t = 'http://' + t };
