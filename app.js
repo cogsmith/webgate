@@ -164,7 +164,7 @@ App.InitMap = function () {
 		'!/teapot': 418,
 		'example.com': 403,
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
-		'example.com/hangup': 'HANGUP',
+		'example.com/hangup/*': 'HANGUP',
 
 		//ALL: 404
 		//ALL: 'PROXY',
