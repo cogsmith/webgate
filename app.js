@@ -160,7 +160,7 @@ App.InitMap = function () {
 	let map = {
 		//ALL: 'PROXY',
 		NOHOST: 403,
-		ELSE: 404,
+		// ELSE: 404,
 		'*/.well-known/*': 'BACKEND',
 		'!/favicon.ico': 'BACKEND',
 		'!/teapot': 418,
@@ -179,7 +179,7 @@ App.InitMap = function () {
 		'*/zx/px/port/9007': 'http://' + App.PrivateIP + ':9007',
 		'*/zx/px/port/9008': 'http://' + App.PrivateIP + ':9008',
 		'*/zx/px/port/9009': 'http://' + App.PrivateIP + ':9009',
-		
+
 		'local.zxdns.net': 'BACKENDADMIN',
 	};
 
@@ -386,17 +386,18 @@ App.ServerHander = function (req, res) {
 		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDELSE[k]; } } }
 	}
 
-	if (!t) { t = map.ELSE; }
-	if (!t) { t = 'NOMAP'; }
+	if (!t && map.ELSE) { t = 'ELSE'; } else { t = 'NOMAP'; }
 
-	if (t == 'OK') { t = 200; }
-	if (t == 'NOMAP') { t = 404; }
-	if (req.isforproxy && t != 'PROXY') { t = 403; }
 	if (!req.admin && t == 'BACKENDADMIN') { t = 'DENY-' + t; }
 
 	// t = target;
 	let logto = t; if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
 	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
+
+	if (t == 'OK') { t = 200; }
+	if (t == 'ELSE') { t = map.ELSE; }
+	if (t == 'NOMAP') { t = 404; }
+	if (req.isforproxy && t != 'PROXY') { t = 403; }
 
 	if (typeof t == 'string' && t.startsWith('DENY-')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
 
