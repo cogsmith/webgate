@@ -367,12 +367,14 @@ App.ServerHander = function (req, res) {
 	let u = new URL(url); let uhost = u.host.toUpperCase();
 	let t = false;
 
+	let ttype = null;
 
-	if (map.ALL) { t = 'ALL'; }
+	if (map.ALL) { ttype='ALL'; t = 'ALL'; }
 
 	if (map.WILDCARD) {
 		if (!t) { t = map.WILDCARD[u.pathname]; }
 		if (!t) { let kz = Object.keys(map.WILDCARD); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDCARD[k]; } } }
+		if (t) { ttype = 'WILDCARD'; }
 	}
 
 	if (map[uhost]) {
@@ -380,22 +382,24 @@ App.ServerHander = function (req, res) {
 		if (!t) { t = map[uhost][u.pathname]; }
 		if (!t) { let kz = Object.keys(map[uhost]); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map[uhost][k]; } } }
 		if (!t) { t = map[uhost]['!']; }
+		if (t) { ttype = 'HOST'; }
 	}
 
 	if (map.WILDELSE) {
 		if (!t) { t = map.WILDELSE[u.pathname]; }
 		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDELSE[k]; } } }
+		if (t) { ttype = 'WILDELSE'; }
 	}
 
 	if (!t) {
-		if (t != 'ALL') { if (map.ELSE) { t = 'ELSE'; } else { t = 'NOMAP'; } }
+		if (t != 'ALL') { if (map.ELSE) { ttype = 'ELSE'; type = 'ELSE'; } else { ttype = 'NOMAP'; t = 'NOMAP'; } }
 	}
 
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
 
 	// t = target;
 
-	let logto = t;
+	let logto = (ttype?ttype+' = ':'') + t;
 	if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
 	if (t == 'ALL') { logto += chalk.white(' => ') + map.ALL } if (t == 'ELSE') { logto += chalk.white(' => ') + map.ELSE };
 	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
