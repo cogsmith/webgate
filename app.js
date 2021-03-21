@@ -175,7 +175,7 @@ App.InitMap = function () {
 		NOHOST: 'ERROR',
 		ELSE: 404,
 		//'!/': 'INFO',
-		'!/info': 'INFO || OK',
+		'!/infook': 'INFO || OK',
 		//'!/*': 'TEAPOT',
 		'*/.well-known/*': 'ACME',
 		'!/favicon.ico': 'WEBFILES',
@@ -221,25 +221,25 @@ App.InitMap = function () {
 
 		let u = k;
 
-		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.TRACE('Proxy.Map: Adding Route: ALL => ' + v); }
-		else if (k == 'ELSE') { mapout['ELSE'] = v; mapcount++; LOG.TRACE('Proxy.Map: Adding Route: ELSE => ' + v); }
+		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.TRACE('Proxy.Map: ALL => ' + v); }
+		else if (k == 'ELSE') { mapout['ELSE'] = v; mapcount++; LOG.TRACE('Proxy.Map: ELSE => ' + v); }
 		else if (k.startsWith('*')) {
 			if (!mapout['WILDCARD']) { mapout['WILDCARD'] = {} }
 			if (k == '*/*') { mapout['WILDCARD']['*'] = v; } else { mapout['WILDCARD'][k.substr(1)] = v; }
-			mapcount++; LOG.TRACE('Proxy.Map: Adding Route: WILDCARD: ' + k + ' => ' + v);
+			mapcount++; LOG.TRACE('Proxy.Map: WILDCARD: ' + k + ' => ' + v);
 		}
 		else if (k.startsWith('!')) {
 			if (!mapout['WILDELSE']) { mapout['WILDELSE'] = {} }
 			if (k == '!/*') { mapout['WILDELSE']['*'] = v; } else { mapout['WILDELSE'][k.substr(1)] = v; }
-			mapcount++; LOG.TRACE('Proxy.Map: Adding Route: WILDELSE: ' + k + ' => ' + v);
+			mapcount++; LOG.TRACE('Proxy.Map: WILDELSE: ' + k + ' => ' + v);
 		}
 		else {
 			let kk = k; if (!k.includes(':')) { kk = 'http://' + k };
 			let u = new URL(kk); let up = u.pathname; let uh = u.host.toUpperCase();
 			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
 			if (!k.includes('/')) { up = '!'; }
-			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: Redefined Route: ' + kk + ' => ' + v); }
-			else { mapcount++; LOG.TRACE('Proxy.Map: Adding Route: HOST: ' + kk + ' => ' + v); }
+			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: HOST: ' + kk + ' => REDEFINED => ' + v); }
+			else { mapcount++; LOG.TRACE('Proxy.Map: HOST: ' + kk + ' => ' + v); }
 			mapout[uh][up] = v;
 		}
 	}
@@ -423,6 +423,8 @@ App.ServerHander = function (req, res) {
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
 
+	if (!req.ip) { t = 'ERROR'; }
+
 	if (typeof t == 'string' && t.includes(' || ')) { t = App.Balancer.Get(t); }
 
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
@@ -430,10 +432,10 @@ App.ServerHander = function (req, res) {
 
 	// t = target;
 
-	let logto = (ttype ? ttype + ' => ' : ''); if (t!=tfull) { logto += tfull + ' => '; }; logto += t;
+	let logto = (ttype ? ttype + ' => ' : ''); if (t != tfull) { logto += tfull + ' => '; }; logto += t;
 	if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
 	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
-	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ',chalk.white(' => '));
+	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => '));
 	LOG.DEBUG(logmsg);
 
 	if (typeof t == 'string' && t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
