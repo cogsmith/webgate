@@ -11,8 +11,9 @@ const https = require('https');
 const tls = require('tls');
 
 const _ = require('lodash');
-const chalk = require('chalk');
+const glob = require('glob');
 const pino = require('pino');
+const chalk = require('chalk');
 const yargs = require('yargs/yargs');
 const axios = require('axios');
 const nconf = require('nconf');
@@ -107,6 +108,7 @@ App.Init = function () {
 
 	App.InitData();
 	App.InitMap();
+	App.InitKeys();
 	App.InitProxy();
 	App.InitServer();
 	App.InitBackend(App.InitDone);
@@ -154,6 +156,14 @@ App.Main = function () {
 
 //
 
+App.InitKeys = function () {
+	glob(App.DataPath+'/*', (err,list) => { 
+		if (err) { LOG.ERROR(err); return; }
+		list.forEach((z)=>{ console.log(z); });
+		LOG.DEBUG('App.InitKeys: '+list.length+' host certificates found');
+	});
+}
+
 App.InitMap = function () {
 	LOG.DEBUG('App.InitMap');
 
@@ -179,7 +189,9 @@ App.InitMap = function () {
 		'*/zx/px/port/9006': 'http://' + App.PrivateIP + ':9006',
 		'*/zx/px/port/9007': 'http://' + App.PrivateIP + ':9007',
 		'*/zx/px/port/9008': 'http://' + App.PrivateIP + ':9008',
-		'*/zx/px/port/9009': 'http://' + App.PrivateIP + ':9009',
+		'*/zx/px/port/9009': 'http://' + App.PrivateIP + ':9009',		
+
+		'localhost/google': '@google.com',
 
 		'local.zxdns.net': 'BACKEND-ADMIN',
 	};
@@ -226,7 +238,8 @@ App.InitMap = function () {
 	}
 
 	let maptext = 'MAPTEXT';
-	LOG.INFO('Proxy.Map: ' + hostcount + ' Hosts / ' + mapcount + ' Routes' + "\n" + chalk.white(maptext) + "\n" + chalk.white(util.inspect(mapout, { colors: true, depth: null, breakLength: 1 })));
+	LOG.DEBUG('Proxy.Map: ' + hostcount + ' Hosts / ' + mapcount + ' Routes' + "\n" + chalk.white(maptext) + "\n" + chalk.white(util.inspect(mapout, { colors: true, depth: null, breakLength: 1 })));
+	LOG.INFO('Proxy.Map: ' + hostcount + ' Hosts / ' + mapcount + ' Routes');
 
 	App.Map = mapout;
 }
@@ -423,6 +436,13 @@ App.ServerHander = function (req, res) {
 	else if (t == 'WEBFILES') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'INFO') {
 		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
+	}
+	else if (t && t.startsWith('@')) {
+		t = t.substring(1);
+		if (!t.includes(':')) { t = 'http://' + t };
+		let p = '/'; p=new URL(t).pathname;
+		req.url = p.pathname || t || '/';
+		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
 	}
 	else if (t && t.startsWith('>')) {
 		t = t.substring(1);
