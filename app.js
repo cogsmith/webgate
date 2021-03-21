@@ -157,11 +157,10 @@ App.Main = function () {
 //
 
 App.InitKeys = function () {
-	glob(App.DataPath+'/*', (err,list) => { 
-		if (err) { LOG.ERROR(err); return; }
-		list.forEach((z)=>{ console.log(z); });
-		LOG.DEBUG('App.InitKeys: '+list.length+' host certificates found');
-	});
+	let count = 0;
+	let list = glob.sync(App.DataPath + '/*');
+	list.forEach((z) => { if (fs.existsSync(z + '/keys/crt')) { count++; LOG.TRACE('App.InitKey: ' + z); } });
+	LOG.DEBUG('App.InitKeys: ' + count + ' host certificates found');
 }
 
 App.InitMap = function () {
@@ -189,7 +188,7 @@ App.InitMap = function () {
 		'*/zx/px/port/9006': 'http://' + App.PrivateIP + ':9006',
 		'*/zx/px/port/9007': 'http://' + App.PrivateIP + ':9007',
 		'*/zx/px/port/9008': 'http://' + App.PrivateIP + ':9008',
-		'*/zx/px/port/9009': 'http://' + App.PrivateIP + ':9009',		
+		'*/zx/px/port/9009': 'http://' + App.PrivateIP + ':9009',
 
 		'localhost/google': '@google.com',
 
@@ -440,7 +439,7 @@ App.ServerHander = function (req, res) {
 	else if (t && t.startsWith('@')) {
 		t = t.substring(1);
 		if (!t.includes(':')) { t = 'http://' + t };
-		let p = '/'; p=new URL(t).pathname;
+		let p = '/'; p = new URL(t).pathname;
 		req.url = p.pathname || t || '/';
 		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
 	}
