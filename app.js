@@ -169,11 +169,16 @@ App.InitMap = function () {
 	let map = {
 		//ALL: 'PROXY',
 		//ALL: 'INFO',
-		NOHOST: 403,
+		//ALL: 'TEAPOT',
+		//ALL: 'HANGUP',
+		//ALL: 'ERROR',
+		NOHOST: 'ERROR',
 		ELSE: 404,
+		'!/': 'INFO',
+		//'!/*': 'TEAPOT',
 		'*/.well-known/*': 'ACME',
 		'!/favicon.ico': 'WEBFILES',
-		'!/teapot': 418,
+		'!/teapot': 'TEAPOT',
 		'example.com': 'HANGUP',
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
 
@@ -195,8 +200,10 @@ App.InitMap = function () {
 		'local.zxdns.net': 'BACKEND-ADMIN',
 	};
 
-	// map['/_/zx/px/*'] = 'BACKEND-ADMIN';
+	// map['/_/*'] = 'BACKEND-ADMIN';
 	if (App.PrivateIP) { map[App.PrivateIP] = 'BACKEND-ADMIN'; }
+
+	//if (map['!/*']) { map['ELSE'] = map['!']; delete map['!']; }
 
 	if (map['!']) { map['ELSE'] = map['!']; delete map['!']; }
 	if (map['*']) { map['ALL'] = map['*']; delete map['*']; }
@@ -400,6 +407,7 @@ App.ServerHander = function (req, res) {
 	}
 
 	if (!t && map.WILDELSE) {
+		if (!t) { t = map.WILDELSE['*']; }
 		if (!t) { t = map.WILDELSE[u.pathname]; }
 		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDELSE[k]; } } }
 		if (t) { ttype = 'WILDELSE'; }
@@ -410,6 +418,7 @@ App.ServerHander = function (req, res) {
 	}
 
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
+	if (req.isforproxy && t != 'PROXY') { t = 'DENY:' + t; }
 
 	// t = target;
 
@@ -418,16 +427,16 @@ App.ServerHander = function (req, res) {
 	if (t == 'ALL') { logto = 'ALL' + chalk.white(' => ') + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + chalk.white(' => ') + map.ELSE };
 	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
 
-	if (t == 'OK') { t = 200; }
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
-	if (t == 'NOMAP') { t = 404; }
-	if (req.isforproxy && t != 'PROXY') { t = 403; }
 
 	if (typeof t == 'string' && t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
-
-	if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
+	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
 	else if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); }
+	else if (t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
+	else if (t == 'OK') { res.statusCode = 200; res.end('OK' + "\n"); }
+	else if (t == 'ERROR') { res.statusCode = 500; res.end('ERROR' + "\n"); }
+	else if (t == 'TEAPOT') { res.statusCode = 418; res.end('TEAPOT' + "\n"); }
 	else if (t == 'PROXY') { LOG.WARN(req.url); App.Proxy.web(req, res, { target: u.href }); }
 	else if (t == 'BACKEND-ADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); } else { res.statusCode = 404; res.end('404' + "\n"); } }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
@@ -436,13 +445,6 @@ App.ServerHander = function (req, res) {
 	else if (t == 'INFO') {
 		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
 	}
-	else if (t && t.startsWith('@')) {
-		t = t.substring(1);
-		if (!t.includes(':')) { t = 'http://' + t };
-		let p = '/'; p = new URL(t).pathname;
-		req.url = p.pathname || t || '/';
-		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
-	}
 	else if (t && t.startsWith('>')) {
 		t = t.substring(1);
 		if (!t.includes(':')) { t = 'http://' + t };
@@ -450,9 +452,18 @@ App.ServerHander = function (req, res) {
 		res.writeHead(301, { Location: loc });
 		res.end(loc + "\n");
 	}
+	else if (t && t.startsWith('@')) {
+		t = t.substring(1);
+		if (!t.includes(':')) { t = 'http://' + t };
+		let p = '/'; p = new URL(t).pathname;
+		req.url = req.url + (p.pathname || '') || '/';
+		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
+	}
 	else {
 		if (!t || t.toUpperCase == 'NULL') { return; }
 		if (!t.includes(':')) { t = 'http://' + t };
+		let tp = '/'; tp = new URL(t).pathname;
+		req.url = tp.pathname || '/';
 		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
 	}
 }
