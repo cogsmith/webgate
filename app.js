@@ -167,8 +167,8 @@ App.InitMap = function () {
 		'example.com': 'HANGUP',
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
 
-		'myjuketube.com':'https://www.youxube.com',
-		'www.myjuketube.com':'https://www.youxube.com',
+		'myjuketube.com': 'https://www.youxube.com',
+		'www.myjuketube.com': 'https://www.youxube.com',
 
 		'*/zx/px/port/9001': 'http://' + App.PrivateIP + ':9001',
 		'*/zx/px/port/9002': 'http://' + App.PrivateIP + ':9002',
@@ -315,8 +315,8 @@ App.ServerHander = function (req, res) {
 	req.urlz = false; try { req.urlz = new URL(req.url); } catch (ex) { }
 
 	delete req.headers['X-Forwarded-For']; req.headers['x-forwarded-for'] = req.ip;
-	//delete req.headers['X-Forwarded-Host']; req.headers['x-forwarded-host'] = req.host;
-	//delete req.headers['X-Forwarded-Proto']; req.headers['x-forwarded-proto'] = stypelc;
+	delete req.headers['X-Forwarded-Host']; req.headers['x-forwarded-host'] = req.host;
+	delete req.headers['X-Forwarded-Proto']; req.headers['x-forwarded-proto'] = stypelc;
 
 	App.Stats.Hits.Total[stype]++;
 	if (!App.Stats.Hits.Host[req.hostuc]) { App.Stats.Hits.Host[req.hostuc] = 1 } else { App.Stats.Hits.Host[req.hostuc]++ }
@@ -329,14 +329,11 @@ App.ServerHander = function (req, res) {
 
 	let toip = App.Args.toip || '127.0.0.1';
 	if (req.url.startsWith('/.well-known')) { target = 'http://' + toip + ':89'; }
-
 	let to = toip;
 
 	LOG.DEBUG({ REQ: { HOST: req.host, URL: req.url } });
 
-	if (req.url.startsWith('http://') || req.url.startsWith('https://')) {
-		req.isforproxy = true; req.url = req.urlz.pathname;
-	}
+	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { req.isforproxy = true; req.url = req.urlz.pathname; }
 
 	let url = stypelc + '://' + req.host + req.url;
 
@@ -361,8 +358,6 @@ App.ServerHander = function (req, res) {
 
 	if (map.ALL) { t = map.ALL; }
 
-
-
 	if (map.WILDCARD) {
 		if (!t) { t = map.WILDCARD[u.pathname]; }
 		if (!t) { let kz = Object.keys(map.WILDCARD); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDCARD[k]; } } }
@@ -383,10 +378,9 @@ App.ServerHander = function (req, res) {
 	if (!t) { t = map.ELSE; }
 	if (!t) { t = 'NOMAP'; }
 
-	if (req.isforproxy && t != 'PROXY') { t = 403; }
-
 	if (t == 'OK') { t = 200; }
 	if (t == 'NOMAP') { t = 404; }
+	if (req.isforproxy && t != 'PROXY') { t = 403; }
 
 	// t = target;
 	let logto = t; if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
@@ -412,7 +406,6 @@ App.ServerHander = function (req, res) {
 	}
 }
 
-
 //
 
 App.SNI = function (host, cb) {
@@ -436,7 +429,7 @@ App.SNI = function (host, cb) {
 					let match = false; for (let i = 0; i < App.PublicIP.length; i++) { if (addrlist.includes(App.PublicIP[i])) { match = true; } }
 					if (match) { App.RequestCert(host, cb); }
 					else { LOG.WARN('SNI.Deny: ' + host + ' Not In PublicIP: ' + addrlist.join(' ') + ' => ' + App.PublicIP.join(' ')); cb(Error('SNI:NXHOST')); return; }
-				} catch (ex) { LOG.ERROR(ex); }
+				} catch (ex) { LOG.ERROR(ex); cb(ex); return; }
 			});
 		}
 	}
@@ -476,7 +469,7 @@ App.MakeCert = function (domain) {
 	let pki = forge.pki; let keys = pki.rsa.generateKeyPair(2048); let cert = pki.createCertificate();
 	cert.publicKey = keys.publicKey; cert.serialNumber = '01';
 	cert.validity.notBefore = new Date();
-	cert.validity.notAfter = new Date('2099-12-31T23:59:59'); //cert.validity.notAfter = new Date(); cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear()+10);
+	cert.validity.notAfter = new Date('2099-12-31T23:59:59'); // cert.validity.notAfter = new Date(); cert.validity.notAfter.setFullYear(cert.validity.notBefore.getFullYear()+10);
 	cert.setSubject(attrs); cert.setIssuer(attrs); cert.sign(keys.privateKey);
 	let key = forge.pki.privateKeyToPem(keys.privateKey);
 	var crt = pki.certificateToPem(cert);
