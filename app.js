@@ -191,6 +191,8 @@ App.InitMap = function () {
 	if (map['*']) { map['ALL'] = map['*']; delete map['*']; }
 	//if (map.ALL) { map = { ALL: map.ALL }; }
 
+	//map = {};
+
 	let mapcount = 0; let hostcount = 0;
 	let mapout = {}; let mapkeys = Object.keys(map);
 	for (let i = 0; i < mapkeys.length; i++) {
@@ -362,7 +364,7 @@ App.ServerHander = function (req, res) {
 	else if (req.url.startsWith('/blog/')) { req.url = req.url.substr(6); target = 'http://' + toip + ':9001'; }
 
 
-	let map = App.Map;
+	let map = App.Map; // map = {};
 
 	let u = new URL(url); let uhost = u.host.toUpperCase();
 	let t = false;
@@ -399,11 +401,9 @@ App.ServerHander = function (req, res) {
 
 	// t = target;
 
-	console.log(t);
-
-	let logto = (ttype ? ttype + ' = ' : '') + t;
+	let logto = (ttype ? ttype + chalk.white(' => ') : '') + t;
 	if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
-	if (t == 'ALL') { logto = 'ALL'+chalk.white(' => ') + map.ALL } else if (t == 'ELSE') { logto = 'ELSE'+chalk.white(' => ') + map.ELSE };
+	if (t == 'ALL') { logto = 'ALL' + chalk.white(' => ') + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + chalk.white(' => ') + map.ELSE };
 	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
 
 	if (t == 'OK') { t = 200; }
