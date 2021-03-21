@@ -197,7 +197,6 @@ App.InitMap = function () {
 		let k = mapkeys[i]; let v = map[k];
 
 		if (k.startsWith('/')) { k = '*' + k; }
-		console.log('K=' + k);
 
 		let u = k;
 
@@ -218,7 +217,6 @@ App.InitMap = function () {
 			let u = new URL(kk); let up = u.pathname; let uh = u.host.toUpperCase();
 			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
 			if (!k.includes('/')) { up = '!'; }
-			//if (k.substr(-1) == '/') { up = '/'; } else { if (k != u.protocol + '//' + uh + u.pathname) { up = '!'; } }
 			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: Redefined Route: ' + kk + ' => ' + v); }
 			else { mapcount++; LOG.TRACE('Proxy.Map: Adding Route: HOST: ' + kk + ' => ' + v); }
 			mapout[uh][up] = v;
@@ -275,7 +273,7 @@ App.InitBackend = function (cb) {
 		nxt();
 	})
 
-	//ff.setNotFoundHandler((req,rep) => { rep.redirect('/404'); });
+	//ff.setNotFoundHandler((req, rep) => { rep.redirect('/404'); });
 	ff.setNotFoundHandler((req, rep) => { rep.code(404).send('Z404'); });
 
 	ff.get('/', (req, rep) => { rep.send(App.Meta.Name); });
@@ -283,11 +281,12 @@ App.InitBackend = function (cb) {
 	ff.get('/zx/px/stats', (req, rep) => {
 		if (!req.admin) { return rep.code(404).send('Z404'); }
 		rep.send(App.Stats);
-	});
+	})
 
 	ff.get('/zx/px/acme', (req, rep) => {
-		LOG.WARN('PX.Acme'); LOG.DEBUG({ IP: req.socket.remoteAddress, Q: req.query, A: App.AdminIP });
-		if (!App.AdminIP.includes(req.socket.remoteAddress)) { return rep.send('NO'); }
+		if (!req.admin) { rep.code(404).send('404'); }
+		//LOG.WARN('PX.Acme'); LOG.DEBUG({ IP: req.socket.remoteAddress, Q: req.query, A: App.AdminIP });
+		//if (!App.AdminIP.includes(req.socket.remoteAddress)) { return rep.send('NO'); }
 		let acmedomain = 'localhost'; if (req.query.acme) { acmedomain = req.query.acme; }
 		rep.send('PX:ACME:' + req.hostname + "\n" + App.GetCert(acmedomain));
 	})
