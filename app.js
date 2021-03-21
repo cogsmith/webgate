@@ -173,7 +173,7 @@ App.InitMap = function () {
 		//ALL: 'HANGUP',
 		//ALL: 'ERROR',		
 		NOHOST: 'ERROR',
-		ELSE: 404,
+		ELSE: '404',
 		//'!/': 'INFO',
 		'!/gate/test': 'INFO || NOTFOUND || NOMAP || 404 || OK || ERROR || DENY || HANGUP || TEAPOT',
 		//'!/*': 'TEAPOT',
@@ -420,24 +420,24 @@ App.ServerHander = function (req, res) {
 
 	let tfull = t;
 
-	if (t == 'ALL') { t = map.ALL; }
-	if (t == 'ELSE') { t = map.ELSE; }
-
+	
 	if (!req.ip) { t = 'ERROR'; }
-
+	
 	if (typeof t == 'string' && t.includes(' || ')) { t = App.Balancer.Get(t); }
-
+	
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
 	if (req.forproxy && t != 'PROXY') { t = 'DENY:' + t; }
-
+	
 	// t = target;
-
-
+	
 	let logto = (ttype ? ttype + ' => ' : ''); if (t != tfull) { logto += tfull + ' => '; }; logto += t;
 	if (Number.isInteger(t)) { try { logto = t + ' => ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { logto = t + ' => 500 => ' + http.STATUS_CODES[500].toUpperCase(); t = 500; } };
 	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
 	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => '));
 	LOG.DEBUG(logmsg);
+	
+	if (t == 'ALL') { t = map.ALL; }
+	if (t == 'ELSE') { t = map.ELSE; }
 
 	if (!isNaN(t)) { t = Number.parseInt(t); }
 
