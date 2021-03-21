@@ -28,6 +28,10 @@ const forge = require('node-forge'); forge.options.usePureJavaScript = true;
 
 //
 
+const NOP = function () { };
+
+//
+
 const AppPackage = require('./package.json');
 const AppMeta = _.merge(AppPackage, { Version: AppPackage.version || process.env.npm_package_version || '0.0.0', Name: AppPackage.namelong || AppPackage.name || 'App', NameTag: AppPackage.nametag || AppPackage.name.toUpperCase(), Info: AppPackage.description || '' });
 AppMeta.Full = AppMeta.Name + ': ' + AppMeta.Info + ' [' + AppMeta.Version + ']';
@@ -133,7 +137,7 @@ App.InitData = function () {
 	if (!fs.existsSync(App.DataPath)) { LOG.WARN('DataPath.CreateMissing: ' + App.DataPath); try { fs.mkdirSync(App.DataPath + '/WWW', { recursive: true }); } catch (ex) { App.Exit(Error('DataPath.CreateFailed: ' + App.DataPath)); } }
 	try { fs.writeFileSync(App.DataPath + '/0', '0'); } catch (ex) { App.Exit(Error('DataPath.NoWriteAccess: ' + App.DataPath)); } finally { fs.rmSync(App.DataPath + '/0'); }
 	fs.writeFileSync(App.DataPath + '/WWW/favicon.ico', 'AAABAAEAEBAQAAAAAAAoAQAAFgAAACgAAAAQAAAAIAAAAAEABAAAAAAAwAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAACAAACAAAAAgIAAgAAAAIAAgACAgAAAwMDAAICAgAAAAP8AAP8AAAD//wD/AAAA/wD/AP//AAD///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD4H///5mf//9gb//+xjf//gYH//126//9P8v//Q8L//0PC//9P8v//Xbr//4GB//+xjf//2Bv//+Zn///4H///', 'base64');
-	fs.writeFileSync(App.DataPath + '/WWW/favicon.ico', 'AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACkVykhpFcpvKRXKcikVyk6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAApFcpl6RXKf+kVyn/pFcpwwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAApFcpMaRXKaOkVyn/pFcp/6RXKcOkVykmAAAAAAAAAAAAAAAAAAAAAAAAAACkVyklpFcpsqRXKbCkVyk9pFcpbqRYKj7oyK5Gz5+B5seUc/DkwqlKpFgqR6RXKWykVylppFcp2qRXKbqkVykWpFcpr6RXKf+kVyn/pFcpvObFrUXoyK/E6Miv/924nf/XrZD/6Miv/+jIr7/mxa07pFcp6aRXKf+kVyn/pFcpeaRXKY6kVyn/pFcp/8SNbfnoyK//6Miv/+jIr//dt5z/162R/+jIr//oyK//6Miv/rl8WP2kVyn/pFcp/KRXKUakVykFpFcpcKRXKXvnxq3c6Miv/+jIr//hvaT/vH9d/7h6Vv/euZ7/6Miv/+jIr//mxKy2pFcpg6RXKTYAAAAAAAAAAKRXKSWkVylA6Miv1ejIr//oyK//uXxZ/6RXKv+kVyr/s3FL/+jIr//oyK//6MivsKRXKVSkVykQAAAAAAAAAACkVykhpFcpQ+jIr9PoyK//6Miv/7RzTv+kVyr/pFcq/61pQf/ox67/6Miv/+jIr7CkVylSpFcpFAAAAAAAAAAApFcpMaRXKWDoyK/Q2rOX/8qZev/Wq47/vIBd/7p9Wv/Vqo3/y5p6/9Wqjf/jwqi6pFcplqRXKXKkVykGpFcpRaRXKfmkVyn/tnhS+deukv/oyK//6Miv/+jIr//oyK//6Miv/+jIr//duJ39sGxF9aRXKf+kVyn/pFcphKRXKY6kVyn/pFcp/6RXKdboyK9E6MivyejIr//oyK//6Miv/+jIr/7oyK+16MivL6RXKbOkVyn/pFcp/6RXKZWkVykrpFcp3aRXKfKkVymFpFcpaqZcMBnoyK9S2bGW6diwlODoyK8+pFcpFqRXKWqkVylcpFcpoqRXKZukVykWAAAAAKRXKQGkVykDAAAAAKRXKQSkVylWpFcpnqRXKf+kVyn/pFcpoKRXKVikVykEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKRXKa6kVyn/pFcp/6RXKbIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACkVyk3pFcp2KRXKdmkVyk6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/D+cQfw/nEH4H5xBAACcQQAAnEEAAJxBAAGcQYABnEGAAZxBgACcQQAAnEEAAJxBAACcQZAPnEH8P5xB/D+cQQ==','base64');
+	fs.writeFileSync(App.DataPath + '/WWW/favicon.ico', 'AAABAAEAEBAAAAEAIABoBAAAFgAAACgAAAAQAAAAIAAAAAEAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACkVykhpFcpvKRXKcikVyk6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAApFcpl6RXKf+kVyn/pFcpwwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAApFcpMaRXKaOkVyn/pFcp/6RXKcOkVykmAAAAAAAAAAAAAAAAAAAAAAAAAACkVyklpFcpsqRXKbCkVyk9pFcpbqRYKj7oyK5Gz5+B5seUc/DkwqlKpFgqR6RXKWykVylppFcp2qRXKbqkVykWpFcpr6RXKf+kVyn/pFcpvObFrUXoyK/E6Miv/924nf/XrZD/6Miv/+jIr7/mxa07pFcp6aRXKf+kVyn/pFcpeaRXKY6kVyn/pFcp/8SNbfnoyK//6Miv/+jIr//dt5z/162R/+jIr//oyK//6Miv/rl8WP2kVyn/pFcp/KRXKUakVykFpFcpcKRXKXvnxq3c6Miv/+jIr//hvaT/vH9d/7h6Vv/euZ7/6Miv/+jIr//mxKy2pFcpg6RXKTYAAAAAAAAAAKRXKSWkVylA6Miv1ejIr//oyK//uXxZ/6RXKv+kVyr/s3FL/+jIr//oyK//6MivsKRXKVSkVykQAAAAAAAAAACkVykhpFcpQ+jIr9PoyK//6Miv/7RzTv+kVyr/pFcq/61pQf/ox67/6Miv/+jIr7CkVylSpFcpFAAAAAAAAAAApFcpMaRXKWDoyK/Q2rOX/8qZev/Wq47/vIBd/7p9Wv/Vqo3/y5p6/9Wqjf/jwqi6pFcplqRXKXKkVykGpFcpRaRXKfmkVyn/tnhS+deukv/oyK//6Miv/+jIr//oyK//6Miv/+jIr//duJ39sGxF9aRXKf+kVyn/pFcphKRXKY6kVyn/pFcp/6RXKdboyK9E6MivyejIr//oyK//6Miv/+jIr/7oyK+16MivL6RXKbOkVyn/pFcp/6RXKZWkVykrpFcp3aRXKfKkVymFpFcpaqZcMBnoyK9S2bGW6diwlODoyK8+pFcpFqRXKWqkVylcpFcpoqRXKZukVykWAAAAAKRXKQGkVykDAAAAAKRXKQSkVylWpFcpnqRXKf+kVyn/pFcpoKRXKVikVykEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAKRXKa6kVyn/pFcp/6RXKbIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACkVyk3pFcp2KRXKdmkVyk6AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/D+cQfw/nEH4H5xBAACcQQAAnEEAAJxBAAGcQYABnEGAAZxBgACcQQAAnEEAAJxBAACcQZAPnEH8P5xB/D+cQQ==', 'base64');
 }
 
 App.InitDone = function () {
@@ -300,13 +304,25 @@ App.InitBackend = function (cb) {
 
 	ff.get('/', (req, rep) => { rep.send(App.Meta.Name); });
 
+	ff.get('/zx/px/loglevel', (req, rep) => {
+		if (!req.admin) { return rep.code(404).send('Z404'); }
+		LOG.level = req.query.level || 'trace';
+		if (LOG.level == 'fatal') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = NOP; LOG.ERROR = NOP; }
+		if (LOG.level == 'error') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = NOP; LOG.ERROR = LOG.error; }
+		if (LOG.level == 'warn') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
+		if (LOG.level == 'info') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
+		if (LOG.level == 'debug') { LOG.TRACE = NOP; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
+		if (LOG.level == 'trace') { LOG.TRACE = LOG.trace; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
+		rep.send(LOG.level);
+	})
+
 	ff.get('/zx/px/stats', (req, rep) => {
 		if (!req.admin) { return rep.code(404).send('Z404'); }
 		rep.send(App.Stats);
 	})
 
 	ff.get('/zx/px/acme', (req, rep) => {
-		if (!req.admin) { rep.code(404).send('404'); }
+		if (!req.admin) { rep.code(404).send('Z404'); }
 		//LOG.WARN('PX.Acme'); LOG.DEBUG({ IP: req.socket.remoteAddress, Q: req.query, A: App.AdminIP });
 		//if (!App.AdminIP.includes(req.socket.remoteAddress)) { return rep.send('NO'); }
 		let acmedomain = 'localhost'; if (req.query.acme) { acmedomain = req.query.acme; }
@@ -420,16 +436,16 @@ App.ServerHander = function (req, res) {
 
 	let tfull = t;
 
-	
+
 	if (!req.ip) { t = 'ERROR'; }
-	
+
 	if (typeof t == 'string' && t.includes(' || ')) { t = App.Balancer.Get(t); }
-	
+
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
 	if (req.forproxy && t != 'PROXY') { t = 'DENY:' + t; }
-	
+
 	// t = target;
-	
+
 	let logto = (ttype ? ttype + ' => ' : ''); if (t != tfull) { logto += tfull + ' => '; }; logto += t;
 	if (Number.isInteger(t)) { try { logto = t + ' => ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { logto = t + ' => 500 => ' + http.STATUS_CODES[500].toUpperCase(); t = 500; } };
 	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
