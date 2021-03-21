@@ -175,7 +175,7 @@ App.InitMap = function () {
 		NOHOST: 'ERROR',
 		ELSE: 404,
 		//'!/': 'INFO',
-		'!/info': 'INFO || TEAPOT',
+		'!/info': 'INFO || OK',
 		//'!/*': 'TEAPOT',
 		'*/.well-known/*': 'ACME',
 		'!/favicon.ico': 'WEBFILES',
@@ -366,7 +366,7 @@ App.ServerHander = function (req, res) {
 
 	LOG.DEBUG({ REQ: { HOST: req.host, URL: req.url } });
 
-	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { req.isforproxy = true; req.url = req.urlz.pathname; }
+	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { req.forproxy = true; req.url = req.urlz.pathname; }
 
 	let url = stypelc + '://' + req.host + req.url;
 
@@ -418,23 +418,23 @@ App.ServerHander = function (req, res) {
 		if (t != 'ALL') { if (map.ELSE) { ttype = 'ELSE'; t = 'ELSE'; } else { ttype = 'NOMAP'; t = 'NOMAP'; } }
 	}
 
+	let tfull = t;
+
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
 
-	console.log(t);
 	if (typeof t == 'string' && t.includes(' || ')) { t = App.Balancer.Get(t); }
-	console.log(t);
 
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
-	if (req.isforproxy && t != 'PROXY') { t = 'DENY:' + t; }
+	if (req.forproxy && t != 'PROXY') { t = 'DENY:' + t; }
 
 	// t = target;
 
-	let logto = (ttype ? ttype + chalk.white(' => ') : '') + t;
+	let logto = (ttype ? ttype + ' => ' : ''); if (t!=tfull) { logto += tfull + ' => '; }; logto += t;
 	if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
-	if (t == 'ALL') { logto = 'ALL' + chalk.white(' => ') + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + chalk.white(' => ') + map.ELSE };
-	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
-
+	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
+	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ',chalk.white(' => '));
+	LOG.DEBUG(logmsg);
 
 	if (typeof t == 'string' && t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
 	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
@@ -580,7 +580,6 @@ App.RequestCert = function (domain, cb) {
 
 //
 
-
 App.Balancer = {
 	DB: {},
 
@@ -594,6 +593,8 @@ App.Balancer = {
 		if (!this.DB[tag]) { this.Add(tag); }
 		let z = this.DB[tag];
 
+		if (this.Mode == 'LEASTBUSY') { this.Mode = 'RANDOM'; }
+
 		let out = tag;
 		if (this.Mode == 'RANDOM') {
 			out = z.List[Math.floor(Math.random() * z.List.length)];
@@ -601,24 +602,13 @@ App.Balancer = {
 		else if (this.Mode == 'ROUNDROBIN') {
 			out = z.List[z.Next++];
 			if (z.Next > z.List.length - 1) { z.Next = 0; }
+		} else if (this.Modes == 'LEASTBUSY') {
+			// TODO
 		}
 
 		return out;
 	}
 }
-
-App.Balancer.Mode = 'ROUNDROBIN';
-App.Balancer.Mode = 'RANDOM';
-
-console.log(App.Balancer.Get('FOO || BAR'));
-console.log(App.Balancer.Get('FOO || BAR'));
-console.log(App.Balancer.Get('FOO || BAR'));
-console.log(App.Balancer.Get('FOO || BAR'));
-console.log(App.Balancer.Get('FOO || BAR'));
-console.log(App.Balancer.Get('FOO || BAR'));
-console.log(App.Balancer.Get('FOO || BAR'));
-console.log(App.Balancer.Get('FOO || BAR'));
-//App.Exit();
 
 //
 
