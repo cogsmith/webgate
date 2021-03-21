@@ -175,7 +175,7 @@ App.InitMap = function () {
 		NOHOST: 'ERROR',
 		ELSE: 404,
 		//'!/': 'INFO',
-		'!/infook': 'INFO || OK',
+		'!/okinfo': 'OK || INFO',
 		//'!/*': 'TEAPOT',
 		'*/.well-known/*': 'ACME',
 		'!/favicon.ico': 'WEBFILES',
@@ -586,6 +586,7 @@ App.Balancer = {
 	DB: {},
 
 	Mode: 'ROUNDROBIN',
+	Mode: 'RANDOM',
 
 	Add: function (tag) {
 		this.DB[tag] = { Tag: tag, List: tag.split(' || '), Next: 0 };
