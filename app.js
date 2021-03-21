@@ -162,8 +162,8 @@ App.InitMap = function () {
 		//ALL: 'INFO',
 		NOHOST: 403,
 		ELSE: 404,
-		'*/.well-known/*': 'BACKEND',
-		'!/favicon.ico': 'BACKEND',
+		'*/.well-known/*': 'ACME',
+		'!/favicon.ico': 'GLOBAL',
 		'!/teapot': 418,
 		'example.com': 'HANGUP',
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
@@ -371,13 +371,13 @@ App.ServerHander = function (req, res) {
 
 	if (map.ALL) { ttype='ALL'; t = 'ALL'; }
 
-	if (map.WILDCARD) {
+	if (!t && map.WILDCARD) {
 		if (!t) { t = map.WILDCARD[u.pathname]; }
 		if (!t) { let kz = Object.keys(map.WILDCARD); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDCARD[k]; } } }
 		if (t) { ttype = 'WILDCARD'; }
 	}
 
-	if (map[uhost]) {
+	if (!t && map[uhost]) {
 		if (!t) { t = map[uhost]['*']; }
 		if (!t) { t = map[uhost][u.pathname]; }
 		if (!t) { let kz = Object.keys(map[uhost]); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map[uhost][k]; } } }
@@ -385,7 +385,7 @@ App.ServerHander = function (req, res) {
 		if (t) { ttype = 'HOST'; }
 	}
 
-	if (map.WILDELSE) {
+	if (!t && map.WILDELSE) {
 		if (!t) { t = map.WILDELSE[u.pathname]; }
 		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDELSE[k]; } } }
 		if (t) { ttype = 'WILDELSE'; }
@@ -417,6 +417,8 @@ App.ServerHander = function (req, res) {
 	else if (t == 'PROXY') { LOG.WARN(req.url); App.Proxy.web(req, res, { target: u.href }); }
 	else if (t == 'BACKEND-ADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); } else { res.statusCode = 404; res.end('404' + "\n"); } }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
+	else if (t == 'ACME') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
+	else if (t == 'GLOBAL') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'INFO') {
 		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
 	}
