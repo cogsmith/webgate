@@ -369,7 +369,7 @@ App.ServerHander = function (req, res) {
 
 	let ttype = null;
 
-	if (map.ALL) { ttype='ALL'; t = 'ALL'; }
+	if (map.ALL) { ttype = 'ALL'; t = 'ALL'; }
 
 	if (!t && map.WILDCARD) {
 		if (!t) { t = map.WILDCARD[u.pathname]; }
@@ -392,16 +392,18 @@ App.ServerHander = function (req, res) {
 	}
 
 	if (!t) {
-		if (t != 'ALL') { if (map.ELSE) { ttype = 'ELSE'; type = 'ELSE'; } else { ttype = 'NOMAP'; t = 'NOMAP'; } }
+		if (t != 'ALL') { if (map.ELSE) { ttype = 'ELSE'; t = 'ELSE'; } else { ttype = 'NOMAP'; t = 'NOMAP'; } }
 	}
 
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
 
 	// t = target;
 
-	let logto = (ttype?ttype+' = ':'') + t;
+	console.log(t);
+
+	let logto = (ttype ? ttype + ' = ' : '') + t;
 	if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
-	if (t == 'ALL') { logto += chalk.white(' => ') + map.ALL } if (t == 'ELSE') { logto += chalk.white(' => ') + map.ELSE };
+	if (t == 'ALL') { logto = 'ALL'+chalk.white(' => ') + map.ALL } else if (t == 'ELSE') { logto = 'ELSE'+chalk.white(' => ') + map.ELSE };
 	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
 
 	if (t == 'OK') { t = 200; }
@@ -422,7 +424,7 @@ App.ServerHander = function (req, res) {
 	else if (t == 'INFO') {
 		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
 	}
-	else if (t.startsWith('>')) {
+	else if (t && t.startsWith('>')) {
 		t = t.substring(1);
 		if (!t.includes(':')) { t = 'http://' + t };
 		let loc = new URL(t).href;
