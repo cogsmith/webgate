@@ -398,7 +398,7 @@ App.ServerHander = function (req, res) {
 
 	let logto = t;
 	if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
-	if (t == 'ALL') { logto += ' => ' + map.ALL } if (t == 'ELSE') { logto += ' => ' + map.ELSE };
+	if (t == 'ALL') { logto += chalk.white(' => ') + map.ALL } if (t == 'ELSE') { logto += chalk.white(' => ') + map.ELSE };
 	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
 
 	if (t == 'OK') { t = 200; }
@@ -406,8 +406,6 @@ App.ServerHander = function (req, res) {
 	if (t == 'ELSE') { t = map.ELSE; }
 	if (t == 'NOMAP') { t = 404; }
 	if (req.isforproxy && t != 'PROXY') { t = 403; }
-
-	console.log(t);
 
 	if (typeof t == 'string' && t.startsWith('DENY-')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
 
