@@ -159,8 +159,9 @@ App.InitMap = function () {
 
 	let map = {
 		//ALL: 'PROXY',
+		//ALL: 'INFO',
 		NOHOST: 403,
-		// ELSE: 404,
+		ELSE: 404,
 		'*/.well-known/*': 'BACKEND',
 		'!/favicon.ico': 'BACKEND',
 		'!/teapot': 418,
@@ -183,7 +184,7 @@ App.InitMap = function () {
 		'local.zxdns.net': 'BACKENDADMIN',
 	};
 
-	map['/_/zx/px/*'] = 'BACKENDADMIN';
+	// map['/_/zx/px/*'] = 'BACKENDADMIN';
 	if (App.PrivateIP) { map[App.PrivateIP] = 'BACKENDADMIN'; }
 
 	if (map['!']) { map['ELSE'] = map['!']; delete map['!']; }
@@ -367,7 +368,8 @@ App.ServerHander = function (req, res) {
 	let u = new URL(url); let uhost = u.host.toUpperCase();
 	let t = false;
 
-	if (map.ALL) { t = map.ALL; }
+
+	if (map.ALL) { t = 'ALL'; }
 
 	if (map.WILDCARD) {
 		if (!t) { t = map.WILDCARD[u.pathname]; }
@@ -386,15 +388,21 @@ App.ServerHander = function (req, res) {
 		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDELSE[k]; } } }
 	}
 
-	if (!t && map.ELSE) { t = 'ELSE'; } else { t = 'NOMAP'; }
+	if (!t) {
+		if (t != 'ALL') { if (map.ELSE) { t = 'ELSE'; } else { t = 'NOMAP'; } }
+	}
 
 	if (!req.admin && t == 'BACKENDADMIN') { t = 'DENY-' + t; }
 
 	// t = target;
-	let logto = t; if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
+
+	let logto = t; 
+	if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
+	if (t == 'ALL') { logto += ' => ' + map.ALL } if (t == 'ELSE') { logto += ' => ' + map.ELSE };
 	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
 
 	if (t == 'OK') { t = 200; }
+	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
 	if (t == 'NOMAP') { t = 404; }
 	if (req.isforproxy && t != 'PROXY') { t = 403; }
