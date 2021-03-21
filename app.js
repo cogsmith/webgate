@@ -175,7 +175,7 @@ App.InitMap = function () {
 		NOHOST: 'ERROR',
 		ELSE: 404,
 		//'!/': 'INFO',
-		'!/okinfo': 'OK || INFO',
+		'!/gate/test': 'INFO || NOTFOUND || NOMAP || 404 || OK || ERROR || DENY || HANGUP || TEAPOT',
 		//'!/*': 'TEAPOT',
 		'*/.well-known/*': 'ACME',
 		'!/favicon.ico': 'WEBFILES',
@@ -438,12 +438,15 @@ App.ServerHander = function (req, res) {
 	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => '));
 	LOG.DEBUG(logmsg);
 
+	if (!isNaN(t)) { t = Number.parseInt(t); }
+
 	if (typeof t == 'string' && t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
 	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
 	else if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); }
 	else if (t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
 	else if (t == 'OK') { res.statusCode = 200; res.end('OK' + "\n"); }
 	else if (t == 'ERROR') { res.statusCode = 500; res.end('ERROR' + "\n"); }
+	else if (t == 'DENY') { res.statusCode = 403; res.end('' + "\n"); }
 	else if (t == 'TEAPOT') { res.statusCode = 418; res.end('TEAPOT' + "\n"); }
 	else if (t == 'PROXY') { LOG.WARN(req.url); App.Proxy.web(req, res, { target: u.href }); }
 	else if (t == 'BACKEND-ADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); } else { res.statusCode = 404; res.end('404' + "\n"); } }
@@ -608,7 +611,7 @@ App.Balancer = {
 		} else if (this.Modes == 'LEASTBUSY') {
 			// TODO
 		}
-
+		
 		return out;
 	}
 }
