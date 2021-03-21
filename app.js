@@ -24,7 +24,7 @@ const fastify_static = require('fastify-static');
 const nodeproxy = require('http-proxy');
 const acme = require('acme-client');
 const forge = require('node-forge'); forge.options.usePureJavaScript = true;
-
+ 
 //
 
 const AppPackage = require('./package.json');
@@ -182,6 +182,7 @@ App.InitMap = function () {
 	};
 
 	map['/_/zx/px/*'] = 'BACKEND';
+	if (App.PrivateIP) { map[App.PrivateIP] = 'BACKEND'; }
 
 	if (map['!']) { map['ELSE'] = map['!']; delete map['!']; }
 	if (map['*']) { map['ALL'] = map['*']; delete map['*']; }
@@ -262,9 +263,12 @@ App.InitBackend = function (cb) {
 	fs.mkdirSync(App.DataPath + '/WWW/.well-known/acme-challenge', { recursive: true });
 	fs.writeFileSync(App.DataPath + '/WWW/.well-known/acme-challenge/acme.txt', 'ACME');
 
-	ff.addHook('onRequest', (req, rep, nxt) => {
+	ff.addHook('onRequest', (req, rep, nxt) => {		
+		req.admin = App.AdminIP.includes(req.ip) || false;
+
 		let reqip = req.socket.remoteAddress;
 		App.Requests++; if (!App.Clients[reqip]) { App.Clients[reqip] = 1; } else { App.Clients[reqip]++; }
+
 		nxt();
 	})
 
@@ -272,6 +276,11 @@ App.InitBackend = function (cb) {
 	ff.setNotFoundHandler((req, rep) => { rep.code(404).send('Z404'); });
 
 	ff.get('/', (req, rep) => { rep.send(App.Meta.Name); });
+
+	ff.get('/zx/px/stats', (req,rep) => { 
+		if (!req.admin) { return rep.code(404).send('Z404'); }
+		rep.send(App.Stats); 
+	});
 
 	ff.get('/zx/px/acme', (req, rep) => {
 		LOG.WARN('PX.Acme'); LOG.DEBUG({ IP: req.socket.remoteAddress, Q: req.query, A: App.AdminIP });
@@ -381,14 +390,18 @@ App.ServerHander = function (req, res) {
 	if (t == 'OK') { t = 200; }
 	if (t == 'NOMAP') { t = 404; }
 	if (req.isforproxy && t != 'PROXY') { t = 403; }
+	if (!req.admin && t=='BACKENDADMIN') { t='DENY-'+t; }
 
 	// t = target;
 	let logto = t; if (Number.isInteger(t)) { try { logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { t = 500; logto = t + ' = ' + http.STATUS_CODES[t].toUpperCase(); } };
 	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
 
+	if (t.startsWith('DENY-')) { res.statusCode = 404; res.end(res.statusCode+"\n"); return; }
+
 	if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
 	else if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); }
 	else if (t == 'PROXY') { LOG.WARN(req.url); App.Proxy.web(req, res, { target: u.href }); }
+	else if (t == 'BACKENDADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); } else { res.statusCode = 404; res.end('404'+"\n"); } }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'INFO') {
 		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
