@@ -163,7 +163,7 @@ App.InitMap = function () {
 		NOHOST: 403,
 		ELSE: 404,
 		'*/.well-known/*': 'ACME',
-		'!/favicon.ico': 'GLOBAL',
+		'!/favicon.ico': 'WEBFILES',
 		'!/teapot': 418,
 		'example.com': 'HANGUP',
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
@@ -420,7 +420,7 @@ App.ServerHander = function (req, res) {
 	else if (t == 'BACKEND-ADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); } else { res.statusCode = 404; res.end('404' + "\n"); } }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'ACME') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
-	else if (t == 'GLOBAL') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
+	else if (t == 'WEBFILES') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'INFO') {
 		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
 	}
