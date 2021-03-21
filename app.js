@@ -181,11 +181,11 @@ App.InitMap = function () {
 		'*/zx/px/port/9008': 'http://' + App.PrivateIP + ':9008',
 		'*/zx/px/port/9009': 'http://' + App.PrivateIP + ':9009',
 
-		'local.zxdns.net': 'BACKENDADMIN',
+		'local.zxdns.net': 'BACKEND-ADMIN',
 	};
 
-	// map['/_/zx/px/*'] = 'BACKENDADMIN';
-	if (App.PrivateIP) { map[App.PrivateIP] = 'BACKENDADMIN'; }
+	// map['/_/zx/px/*'] = 'BACKEND-ADMIN';
+	if (App.PrivateIP) { map[App.PrivateIP] = 'BACKEND-ADMIN'; }
 
 	if (map['!']) { map['ELSE'] = map['!']; delete map['!']; }
 	if (map['*']) { map['ALL'] = map['*']; delete map['*']; }
@@ -391,7 +391,7 @@ App.ServerHander = function (req, res) {
 		if (t != 'ALL') { if (map.ELSE) { t = 'ELSE'; } else { t = 'NOMAP'; } }
 	}
 
-	if (!req.admin && t == 'BACKENDADMIN') { t = 'DENY-' + t; }
+	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
 
 	// t = target;
 
@@ -406,12 +406,12 @@ App.ServerHander = function (req, res) {
 	if (t == 'NOMAP') { t = 404; }
 	if (req.isforproxy && t != 'PROXY') { t = 403; }
 
-	if (typeof t == 'string' && t.startsWith('DENY-')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
+	if (typeof t == 'string' && t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
 
 	if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
 	else if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); }
 	else if (t == 'PROXY') { LOG.WARN(req.url); App.Proxy.web(req, res, { target: u.href }); }
-	else if (t == 'BACKENDADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); } else { res.statusCode = 404; res.end('404' + "\n"); } }
+	else if (t == 'BACKEND-ADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); } else { res.statusCode = 404; res.end('404' + "\n"); } }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'INFO') {
 		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
