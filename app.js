@@ -425,7 +425,7 @@ App.ServerHander = function (req, res) {
 		res.end(loc + "\n");
 	}
 	else {
-		if (!t || t.toUpperCase=='NULL') { return; }
+		if (!t || t.toUpperCase == 'NULL') { return; }
 		if (!t.includes(':')) { t = 'http://' + t };
 		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
 	}
