@@ -171,10 +171,11 @@ App.InitMap = function () {
 		//ALL: 'INFO',
 		//ALL: 'TEAPOT',
 		//ALL: 'HANGUP',
-		//ALL: 'ERROR',
+		//ALL: 'ERROR',		
 		NOHOST: 'ERROR',
 		ELSE: 404,
-		'!/': 'INFO',
+		//'!/': 'INFO',
+		'!/info': 'INFO || TEAPOT',
 		//'!/*': 'TEAPOT',
 		'*/.well-known/*': 'ACME',
 		'!/favicon.ico': 'WEBFILES',
@@ -417,6 +418,13 @@ App.ServerHander = function (req, res) {
 		if (t != 'ALL') { if (map.ELSE) { ttype = 'ELSE'; t = 'ELSE'; } else { ttype = 'NOMAP'; t = 'NOMAP'; } }
 	}
 
+	if (t == 'ALL') { t = map.ALL; }
+	if (t == 'ELSE') { t = map.ELSE; }
+
+	console.log(t);
+	if (typeof t == 'string' && t.includes(' || ')) { t = App.Balancer.Get(t); }
+	console.log(t);
+
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
 	if (req.isforproxy && t != 'PROXY') { t = 'DENY:' + t; }
 
@@ -427,8 +435,6 @@ App.ServerHander = function (req, res) {
 	if (t == 'ALL') { logto = 'ALL' + chalk.white(' => ') + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + chalk.white(' => ') + map.ELSE };
 	LOG.DEBUG(chalk.white(req.ip) + ' ' + (req.isforproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + chalk.white(' => ') + logto + ((LOG.level == 'trace') ? "\n" : ''));
 
-	if (t == 'ALL') { t = map.ALL; }
-	if (t == 'ELSE') { t = map.ELSE; }
 
 	if (typeof t == 'string' && t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
 	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
@@ -571,6 +577,48 @@ App.RequestCert = function (domain, cb) {
 	}
 	try { afx(); } catch (ex) { LOG.ERROR(ex); }
 }
+
+//
+
+
+App.Balancer = {
+	DB: {},
+
+	Mode: 'ROUNDROBIN',
+
+	Add: function (tag) {
+		this.DB[tag] = { Tag: tag, List: tag.split(' || '), Next: 0 };
+	},
+
+	Get: function (tag) {
+		if (!this.DB[tag]) { this.Add(tag); }
+		let z = this.DB[tag];
+
+		let out = tag;
+		if (this.Mode == 'RANDOM') {
+			out = z.List[Math.floor(Math.random() * z.List.length)];
+		}
+		else if (this.Mode == 'ROUNDROBIN') {
+			out = z.List[z.Next++];
+			if (z.Next > z.List.length - 1) { z.Next = 0; }
+		}
+
+		return out;
+	}
+}
+
+App.Balancer.Mode = 'ROUNDROBIN';
+App.Balancer.Mode = 'RANDOM';
+
+console.log(App.Balancer.Get('FOO || BAR'));
+console.log(App.Balancer.Get('FOO || BAR'));
+console.log(App.Balancer.Get('FOO || BAR'));
+console.log(App.Balancer.Get('FOO || BAR'));
+console.log(App.Balancer.Get('FOO || BAR'));
+console.log(App.Balancer.Get('FOO || BAR'));
+console.log(App.Balancer.Get('FOO || BAR'));
+console.log(App.Balancer.Get('FOO || BAR'));
+//App.Exit();
 
 //
 
