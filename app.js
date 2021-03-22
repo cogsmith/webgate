@@ -187,9 +187,9 @@ App.InitMap = function () {
 	let map = {};
 
 	if (App.Args.mapfile) {
-		for (let i = 0; i < App.Args.mapfile.length; i++) {			
+		for (let i = 0; i < App.Args.mapfile.length; i++) {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
-			fs.watch(App.DataPath + '/' + z, (etype, file) => { if (etype == 'change') { setTimeout(App.LoadMaps,99); } });
+			fs.watch(App.DataPath + '/' + z, (etype, file) => { if (etype == 'change') { setTimeout(App.LoadMaps, 99); } });
 		}
 	}
 
@@ -570,7 +570,7 @@ App.SNI = function (host, cb) {
 App.GetCert = function (domain) {
 	domain = domain.toUpperCase();
 	LOG.TRACE('GetCert: ' + domain);
-	if (domain=='GATE.TEST') { domain = 'LOCALHOST'; }
+	if (domain == 'GATE.TEST') { domain = 'LOCALHOST'; }
 	if (App.CertDB.Data[domain]) { LOG.TRACE('GetCert.Cached: ' + domain); return App.CertDB.Data[domain]; }
 	else {
 		let slug = App.GetHostSlug(domain);
