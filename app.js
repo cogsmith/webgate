@@ -451,15 +451,14 @@ App.ServerHander = function (req, res) {
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
 
-	if (!isNaN(t)) { t = Number.parseInt(t); }
+	if (t!='404' && !isNaN(t)) { t = Number.parseInt(t); }
 
 	if (typeof (t) == 'number') { res.statusCode = t; res.end(); }
-	else if (t == 'BADURL' || t == 'DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(''); return; }
+	else if (t == 'BADURL' || t == 'DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(); return; }
 	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
 	else if (t == '404' || t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
 	else if (t == 'ERROR') { res.statusCode = 500; res.end('ERROR' + "\n"); }
 	else if (t == 'OK') { res.statusCode = 200; res.end('OK' + "\n"); }
-	else if (t == 'DENY') { res.statusCode = 403; res.end(); }
 	else if (t == 'TEAPOT') { res.statusCode = 418; res.end('TEAPOT' + "\n"); }
 	else if (t == 'PROXY') { App.Proxy.web(req, res, { target: u.href }); }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
