@@ -1,6 +1,5 @@
+process.on('SIGTERM', function () { let code = 0; process.exit(code); });
 // process.on('uncaughtException', function (err) { console.log("\n"); console.log(err); console.log("\n"); process.exit(1); }); // throw(Error('ERROR'));
-
-//
 
 const util = require('util');
 const path = require('path');
