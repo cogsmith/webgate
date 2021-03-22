@@ -1,3 +1,4 @@
+const NOP = function () { };
 process.onSIGTERM = function () { process.exit(); }; process.on('SIGTERM', function () { process.onSIGTERM(); });
 // process.on('uncaughtException', function (err) { console.log("\n"); console.log(err); console.log("\n"); process.exit(1); }); // throw(Error('ERROR'));
 
@@ -24,10 +25,6 @@ const fastify_static = require('fastify-static');
 const nodeproxy = require('http-proxy');
 const acme = require('acme-client');
 const forge = require('node-forge'); forge.options.usePureJavaScript = true;
-
-//
-
-const NOP = function () { };
 
 //
 
@@ -126,7 +123,6 @@ App.Init = function () {
 	LOG.DEBUG('Node.Info: ' + chalk.white(App.Info('Node')));
 	LOG.DEBUG('Node.Args: ' + chalk.white(App.Info('Node.Args')));
 	LOG.DEBUG('App.Info: ' + chalk.white(App.Info('App')));
-
 
 	App.InitData();
 	App.InitMap();
