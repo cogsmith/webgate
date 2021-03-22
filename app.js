@@ -199,6 +199,7 @@ App.InitMap = function () {
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
 
 		'*/wp-login.php': 'BADURL',
+		'*/.env': 'BADURL',
 
 		'myjuketube.com': 'https://www.youxube.com',
 		'www.myjuketube.com': 'https://www.youxube.com',
@@ -362,10 +363,10 @@ App.InitProxyServer = function () {
 
 //
 
-App.EndRequest = function (req,res,code) {
-	if (code=500) { res.socket.end(); return; }
+App.EndRequest = function (req, res, code) {
+	if (code = 500) { res.socket.end(); return; }
 	res.statusCode = code;
-	res.shouldKeepAlive = false; 
+	res.shouldKeepAlive = false;
 	res.end();
 }
 
@@ -436,13 +437,13 @@ App.ServerHander = function (req, res) {
 	if (typeof t == 'string' && t.includes(' || ')) { t = App.Balancer.Get(t); }
 
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
-	if (req.forproxy && t != 'PROXY') { t = 'DENY:' + t; }	
+	if (req.forproxy && t != 'PROXY') { t = 'DENY:' + t; }
 
 	let logto = (ttype ? ttype + ' => ' : ''); if (t != tfull) { logto += tfull + ' => '; }; logto += t;
 	if (Number.isInteger(t)) { try { logto = t + ' => ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { logto = t + ' => 500 => ' + http.STATUS_CODES[500].toUpperCase(); t = 500; } };
 	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
-	let logmsg = (chalk[req.admin?'yellow':'white'](req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => ')).replaceAll('DENY:', chalk.red('DENY:'));
-	let loglinelevel = 'INFO'; if (t=='BADURL') { loglinelevel='TRACE'; };
+	let logmsg = (chalk[req.admin ? 'yellow' : 'white'](req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => ')).replaceAll('DENY:', chalk.red('DENY:'));
+	let loglinelevel = 'INFO'; if (t == 'BADURL') { loglinelevel = 'TRACE'; };
 	LOG[loglinelevel](logmsg);
 
 	if (t == 'ALL') { t = map.ALL; }
@@ -450,8 +451,8 @@ App.ServerHander = function (req, res) {
 
 	if (!isNaN(t)) { t = Number.parseInt(t); }
 
-	if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); } 
-	else if (t=='BADURL' || t=='DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
+	if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); }
+	else if (t == 'BADURL' || t == 'DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
 	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
 	else if (t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
 	else if (t == 'ERROR') { res.statusCode = 500; res.end('ERROR' + "\n"); }
