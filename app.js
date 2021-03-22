@@ -214,6 +214,8 @@ App.InitMap = function () {
 		'*/zx/px/port/9008': 'http://' + App.PrivateIP + ':9008',
 		'*/zx/px/port/9009': 'http://' + App.PrivateIP + ':9009',
 
+		'/_/gate/*': 'INFO',
+
 		'localhost/google': '@google.com',
 
 		'local.zxdns.net': 'BACKEND-ADMIN',
@@ -407,14 +409,14 @@ App.ServerHander = function (req, res) {
 
 	if (!t && map.WILDCARD) {
 		if (!t) { t = map.WILDCARD[u.pathname]; }
-		if (!t) { let kz = Object.keys(map.WILDCARD); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDCARD[k]; } } }
+		if (!t) { let kz = Object.keys(map.WILDCARD); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); let ku2 = k.substr(0, k.length - 2); if ((k.substr(-2) == '/*' && u.pathname == ku2) || (k.substr(-1) == '*' && u.pathname.startsWith(ku))) { t = map.WILDCARD[k]; } } }
 		if (t) { ttype = 'WILDCARD'; }
 	}
 
 	if (!t && map[uhost]) {
 		if (!t) { t = map[uhost]['*']; }
 		if (!t) { t = map[uhost][u.pathname]; }
-		if (!t) { let kz = Object.keys(map[uhost]); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map[uhost][k]; } } }
+		if (!t) { let kz = Object.keys(map[uhost]); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); let ku2 = k.substr(0, k.length - 2); if ((k.substr(-2) == '/*' && u.pathname == ku2) || (k.substr(-1) == '*' && u.pathname.startsWith(ku))) { t = map[uhost][k]; } } }
 		if (!t) { t = map[uhost]['!']; }
 		if (t) { ttype = 'HOST'; }
 	}
@@ -422,7 +424,7 @@ App.ServerHander = function (req, res) {
 	if (!t && map.WILDELSE) {
 		if (!t) { t = map.WILDELSE['*']; }
 		if (!t) { t = map.WILDELSE[u.pathname]; }
-		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); if (k.substr(-1) == '*' && u.pathname.startsWith(ku)) { t = map.WILDELSE[k]; } } }
+		if (!t) { let kz = Object.keys(map.WILDELSE); for (let i = 0; i < kz.length; i++) { let k = kz[i]; let ku = k.substr(0, k.length - 1); let ku2 = k.substr(0, k.length - 2); if ((k.substr(-2) == '/*' && u.pathname == ku2) || (k.substr(-1) == '*' && u.pathname.startsWith(ku))) { t = map.WILDELSE[k]; } } }
 		if (t) { ttype = 'WILDELSE'; }
 	}
 
