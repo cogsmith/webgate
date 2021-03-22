@@ -281,7 +281,7 @@ App.GetSlugHost = function (slug) { let host = slug.replace(/_/g, '.'); let z = 
 App.InitBackend = function (cb) {
 	LOG.DEBUG('App.InitBackend');
 
-	App.Backend = { Endpoint: 'http://' + App.IP + ':' + App.Port, Fastify: fastify({ logger: App.Log, maxParamLength: 999, ignoreTrailingSlash: false, }) };
+	App.Backend = { Endpoint: 'http://' + App.IP + ':' + App.Port, Fastify: fastify({ logger: App.Log, disableRequestLogging:true, maxParamLength: 999, ignoreTrailingSlash: false, }) };
 
 	let ff = App.Backend.Fastify;
 	ff.register(fastify_compress);
