@@ -97,6 +97,16 @@ if (App.Args.debugargs) { console.log("\n"); console.log(App.Args); console.log(
 if (App.Args.help) { AppArg.showHelp('log'); console.log("\n" + App.Info('Node') + "\n"); App.Exit({ silent: true }); }
 if (App.Args.version) { console.log(App.Meta.Version); App.Exit({ silent: true }); }
 
+App.Log.SetLevel = function (level) {
+	LOG.level = level || 'trace';
+	if (LOG.level == 'fatal') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = NOP; LOG.ERROR = NOP; }
+	if (LOG.level == 'error') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = NOP; LOG.ERROR = LOG.error; }
+	if (LOG.level == 'warn') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
+	if (LOG.level == 'info') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
+	if (LOG.level == 'debug') { LOG.TRACE = NOP; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
+	if (LOG.level == 'trace') { LOG.TRACE = LOG.trace; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
+}
+
 //
 
 App.Init = function () {
@@ -306,14 +316,8 @@ App.InitBackend = function (cb) {
 
 	ff.get('/zx/px/loglevel', (req, rep) => {
 		if (!req.admin) { return rep.code(404).send('Z404'); }
-		LOG.level = req.query.level || 'trace';
-		if (LOG.level == 'fatal') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = NOP; LOG.ERROR = NOP; }
-		if (LOG.level == 'error') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = NOP; LOG.ERROR = LOG.error; }
-		if (LOG.level == 'warn') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
-		if (LOG.level == 'info') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
-		if (LOG.level == 'debug') { LOG.TRACE = NOP; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
-		if (LOG.level == 'trace') { LOG.TRACE = LOG.trace; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
-		rep.send(LOG.level);
+		let level = req.query.level || 'trace';
+		rep.send(App.Log.SetLevel(level));
 	})
 
 	ff.get('/zx/px/stats', (req, rep) => {
