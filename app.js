@@ -110,6 +110,11 @@ App.Log.SetLevel = function (level) {
 
 //
 
+App.GetHostSlug = function (host) { let slug = host.replace(/\./g, '_').toUpperCase(); let z = slug.split('_'); if (z.length >= 3) { slug = z.slice(-2).join('_') + '_' + z.slice(0, z.length - 2).reverse().join('_'); }; return slug; };
+App.GetSlugHost = function (slug) { let host = slug.replace(/_/g, '.'); let z = slug.split('_'); if (z.length >= 2) { host = z.slice(2).reverse().join('.') + '.' + z.slice(0, 2).join('.'); }; return host; };
+
+//
+
 App.Init = function () {
 	if (App.Args.map || App.Args.mapfile) { App.Args.to = ['MAP']; }
 
@@ -273,7 +278,23 @@ App.InitMap = function () {
 
 App.InitProxy = function () {
 	LOG.DEBUG('App.InitProxy');
-	App.InitProxyServer();
+
+	App.Proxy = nodeproxy.createProxyServer({});
+
+	App.Proxy.on('open', function (socket) { });
+	App.Proxy.on('close', function (socket) { });
+
+	App.Proxy.on('error', function (err, req, res) { LOG.ERROR(err); res.writeHead(500, { 'Content-Type': 'text/plain' }); res.end('PX:ERROR:HTTP:' + "\n" + err); });
+
+	App.Proxy.on('proxyReq', function (proxyReq, req, res, options) {
+		LOG.TRACE({ PREQ: { H: proxyReq.headers, U: proxyReq.url, P: proxyReq.protocol, PP: proxyReq.socket.encrypted }, REQ: { H: req.headers, U: req.url, PP: req.socket.encrypted }, RES: { H: res.headers, P: res.protocol, S: res.statusCode } });
+		//proxyReq.removeHeader('X-Forwarded-For'); proxyReq.setHeader('X-Forwarded-For', req.socket.remoteAddress);
+		//proxyReq.removeHeader('x-forwarded-for'); proxyReq.setHeader('x-forwarded-for', req.socket.remoteAddress);
+	})
+
+	App.Proxy.on('proxyRes', function (proxyRes, req, res, options) {
+		LOG.TRACE({ PRES: { H: proxyRes.headers, U: proxyRes.url, P: proxyRes.protocol, S: proxyRes.statusCode }, REQ: { H: req.headers, U: req.url, PP: req.socket.encrypted }, RES: { H: res.headers, P: res.protocol, S: res.statusCode } });
+	})
 }
 
 App.InitServer = async function () {
@@ -286,11 +307,6 @@ App.InitServer = async function () {
 	App.Server.HTTPS = https.createServer({ key: App.CertLocal.KEY, cert: App.CertLocal.CRT, SNICallback: App.SNI }, App.ServerHander);
 	App.Server.HTTPS.listen(App.Args.port443, App.IP);
 }
-
-//
-
-App.GetHostSlug = function (host) { let slug = host.replace(/\./g, '_').toUpperCase(); let z = slug.split('_'); if (z.length >= 3) { slug = z.slice(-2).join('_') + '_' + z.slice(0, z.length - 2).reverse().join('_'); }; return slug; };
-App.GetSlugHost = function (slug) { let host = slug.replace(/_/g, '.'); let z = slug.split('_'); if (z.length >= 2) { host = z.slice(2).reverse().join('.') + '.' + z.slice(0, 2).join('.'); }; return host; };
 
 //
 
@@ -340,27 +356,6 @@ App.InitBackend = function (cb) {
 	})
 
 	ff.log.infomute = ff.log.info; ff.log.info = ff.log.trace; ff.listen(89, '127.0.0.1', (err, address) => { ff.log.info = ff.log.infomute; if (err) { LOG.ERROR(err); } else { App.BackendStatus = 'UP'; setTimeout(cb, 9); } });
-}
-
-//
-
-App.InitProxyServer = function () {
-	App.Proxy = nodeproxy.createProxyServer({});
-
-	App.Proxy.on('open', function (socket) { });
-	App.Proxy.on('close', function (socket) { });
-
-	App.Proxy.on('error', function (err, req, res) { LOG.ERROR(err); res.writeHead(500, { 'Content-Type': 'text/plain' }); res.end('PX:ERROR:HTTP:' + "\n" + err); });
-
-	App.Proxy.on('proxyReq', function (proxyReq, req, res, options) {
-		LOG.TRACE({ PREQ: { H: proxyReq.headers, U: proxyReq.url, P: proxyReq.protocol, PP: proxyReq.socket.encrypted }, REQ: { H: req.headers, U: req.url, PP: req.socket.encrypted }, RES: { H: res.headers, P: res.protocol, S: res.statusCode } });
-		//proxyReq.removeHeader('X-Forwarded-For'); proxyReq.setHeader('X-Forwarded-For', req.socket.remoteAddress);
-		//proxyReq.removeHeader('x-forwarded-for'); proxyReq.setHeader('x-forwarded-for', req.socket.remoteAddress);
-	})
-
-	App.Proxy.on('proxyRes', function (proxyRes, req, res, options) {
-		LOG.TRACE({ PRES: { H: proxyRes.headers, U: proxyRes.url, P: proxyRes.protocol, S: proxyRes.statusCode }, REQ: { H: req.headers, U: req.url, PP: req.socket.encrypted }, RES: { H: res.headers, P: res.protocol, S: res.statusCode } });
-	})
 }
 
 //
@@ -451,7 +446,7 @@ App.ServerHander = function (req, res) {
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
 
-	if (t!='404' && !isNaN(t)) { t = Number.parseInt(t); }
+	if (typeof t == 'string' && !isNaN(t)) { t = Number.parseInt(t); }
 
 	if (typeof (t) == 'number') { res.statusCode = t; res.end(); }
 	else if (t == 'BADURL' || t == 'DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(); return; }
