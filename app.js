@@ -198,6 +198,8 @@ App.InitMap = function () {
 		'example.com': 'HANGUP',
 		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
 
+		'*/wp-login.php': 'BADURL',
+
 		'myjuketube.com': 'https://www.youxube.com',
 		'www.myjuketube.com': 'https://www.youxube.com',
 
@@ -388,8 +390,6 @@ App.ServerHander = function (req, res) {
 
 	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { req.forproxy = true; if (req.urlz) { req.url = req.urlz.pathname; } }
 
-	if (req.url=='/wp-login.php') { req.badurl = true; }
-
 	let url = stypelc + '://' + req.host + req.url;
 
 	LOG.TRACE(chalk.white(req.ip) + ' ' + req.method + ' ' + url, { Admin: req.admin, Open: { HTTP: App.Server.HTTP._connections, HTTPS: App.Server.HTTPS._connections } });
@@ -436,13 +436,13 @@ App.ServerHander = function (req, res) {
 	if (typeof t == 'string' && t.includes(' || ')) { t = App.Balancer.Get(t); }
 
 	if (!req.admin && t == 'BACKEND-ADMIN') { t = 'DENY:' + t; }
-	if (req.forproxy && t != 'PROXY') { t = 'DENY:' + t; }
+	if (req.forproxy && t != 'PROXY') { t = 'DENY:' + t; }	
 
 	let logto = (ttype ? ttype + ' => ' : ''); if (t != tfull) { logto += tfull + ' => '; }; logto += t;
 	if (Number.isInteger(t)) { try { logto = t + ' => ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { logto = t + ' => 500 => ' + http.STATUS_CODES[500].toUpperCase(); t = 500; } };
 	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
 	let logmsg = (chalk[req.admin?'yellow':'white'](req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => ')).replaceAll('DENY:', chalk.red('DENY:'));
-	let loglinelevel = 'INFO'; if (req.badurl) { loglinelevel='TRACE'; };
+	let loglinelevel = 'INFO'; if (t=='BADURL') { loglinelevel='TRACE'; };
 	LOG[loglinelevel](logmsg);
 
 	if (t == 'ALL') { t = map.ALL; }
@@ -450,8 +450,8 @@ App.ServerHander = function (req, res) {
 
 	if (!isNaN(t)) { t = Number.parseInt(t); }
 
-	if (typeof t == 'string' && t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
-	else if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); }
+	if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); } 
+	else if (t=='BADURL' || t=='DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
 	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
 	else if (t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
 	else if (t == 'ERROR') { res.statusCode = 500; res.end('ERROR' + "\n"); }
