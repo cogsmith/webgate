@@ -1,4 +1,4 @@
-process.on('SIGTERM', function () { let code = 0; process.exit(code); });
+process.onSIGTERM = function () { process.exit(); }; process.on('SIGTERM', process.onSIGTERM);
 // process.on('uncaughtException', function (err) { console.log("\n"); console.log(err); console.log("\n"); process.exit(1); }); // throw(Error('ERROR'));
 
 const util = require('util');
@@ -119,11 +119,14 @@ App.Init = function () {
 
 	App.SetInfo('App', function () { return 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE') + ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY') + (App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ') + (App.Args.to[0] ? '> ' + App.Args.to.join(' ') + ' ' : ''); });
 
+	process.onSIGTERM = function () { LOG.WARN('App.Process: SIGTERM'); App.Exit(1); };
+
 	LOG.TRACE({ App: App });
 	LOG.INFO(App.Meta.Full);
 	LOG.DEBUG('Node.Info: ' + chalk.white(App.Info('Node')));
 	LOG.DEBUG('Node.Args: ' + chalk.white(App.Info('Node.Args')));
 	LOG.DEBUG('App.Info: ' + chalk.white(App.Info('App')));
+
 
 	App.InitData();
 	App.InitMap();
