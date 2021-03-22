@@ -343,13 +343,13 @@ App.InitProxyServer = function () {
 	App.Proxy.on('error', function (err, req, res) { LOG.ERROR(err); res.writeHead(500, { 'Content-Type': 'text/plain' }); res.end('PX:ERROR:HTTP:' + "\n" + err); });
 
 	App.Proxy.on('proxyReq', function (proxyReq, req, res, options) {
-		LOG.DEBUG({ PREQ: { H: proxyReq.headers, U: proxyReq.url, P: proxyReq.protocol, PP: proxyReq.socket.encrypted }, REQ: { H: req.headers, U: req.url, PP: req.socket.encrypted }, RES: { H: res.headers, P: res.protocol, S: res.statusCode } });
+		LOG.TRACE({ PREQ: { H: proxyReq.headers, U: proxyReq.url, P: proxyReq.protocol, PP: proxyReq.socket.encrypted }, REQ: { H: req.headers, U: req.url, PP: req.socket.encrypted }, RES: { H: res.headers, P: res.protocol, S: res.statusCode } });
 		//proxyReq.removeHeader('X-Forwarded-For'); proxyReq.setHeader('X-Forwarded-For', req.socket.remoteAddress);
 		//proxyReq.removeHeader('x-forwarded-for'); proxyReq.setHeader('x-forwarded-for', req.socket.remoteAddress);
 	})
 
 	App.Proxy.on('proxyRes', function (proxyRes, req, res, options) {
-		LOG.DEBUG({ PRES: { H: proxyRes.headers, U: proxyRes.url, P: proxyRes.protocol, S: proxyRes.statusCode }, REQ: { H: req.headers, U: req.url, PP: req.socket.encrypted }, RES: { H: res.headers, P: res.protocol, S: res.statusCode } });
+		LOG.TRACE({ PRES: { H: proxyRes.headers, U: proxyRes.url, P: proxyRes.protocol, S: proxyRes.statusCode }, REQ: { H: req.headers, U: req.url, PP: req.socket.encrypted }, RES: { H: res.headers, P: res.protocol, S: res.statusCode } });
 	})
 }
 
@@ -380,7 +380,7 @@ App.ServerHander = function (req, res) {
 	if (req.url.startsWith('/.well-known')) { target = 'http://' + toip + ':89'; }
 	let to = toip;
 
-	LOG.DEBUG({ REQ: { HOST: req.host, URL: req.url } });
+	LOG.TRACE({ REQ: { HOST: req.host, URL: req.url } });
 
 	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { req.forproxy = true; req.url = req.urlz.pathname; }
 
