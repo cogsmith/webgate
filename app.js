@@ -118,7 +118,7 @@ App.Init = function () {
 	LOG.INFO(App.Meta.Full);
 	LOG.DEBUG('Node.Info: ' + chalk.white(App.Info('Node')));
 	LOG.DEBUG('Node.Args: ' + chalk.white(App.Info('Node.Args')));
-	LOG.INFO('App.Info: ' + chalk.white(App.Info('App')));
+	LOG.DEBUG('App.Info: ' + chalk.white(App.Info('App')));
 
 	App.InitData();
 	App.InitMap();
@@ -174,7 +174,7 @@ App.InitKeys = function () {
 	let count = 0;
 	let list = glob.sync(App.DataPath + '/*');
 	list.forEach((z) => { if (fs.existsSync(z + '/keys/crt')) { count++; LOG.TRACE('App.InitKey: ' + z); } });
-	LOG.DEBUG('App.InitKeys: ' + count + ' host certificates found');
+	LOG.INFO('Host.Keys: ' + count + ' certificates found');
 }
 
 App.InitMap = function () {
@@ -235,17 +235,17 @@ App.InitMap = function () {
 
 		let u = k;
 
-		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.TRACE('Proxy.Map: ALL => ' + v); }
-		else if (k == 'ELSE') { mapout['ELSE'] = v; mapcount++; LOG.TRACE('Proxy.Map: ELSE => ' + v); }
+		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.DEBUG('Proxy.Map: ALL => ' + v); }
+		else if (k == 'ELSE') { mapout['ELSE'] = v; mapcount++; LOG.DEBUG('Proxy.Map: ELSE => ' + v); }
 		else if (k.startsWith('*')) {
 			if (!mapout['WILDCARD']) { mapout['WILDCARD'] = {} }
 			if (k == '*/*') { mapout['WILDCARD']['*'] = v; } else { mapout['WILDCARD'][k.substr(1)] = v; }
-			mapcount++; LOG.TRACE('Proxy.Map: WILDCARD: ' + k + ' => ' + v);
+			mapcount++; LOG.DEBUG('Proxy.Map: WILDCARD: ' + k + ' => ' + v);
 		}
 		else if (k.startsWith('!')) {
 			if (!mapout['WILDELSE']) { mapout['WILDELSE'] = {} }
 			if (k == '!/*') { mapout['WILDELSE']['*'] = v; } else { mapout['WILDELSE'][k.substr(1)] = v; }
-			mapcount++; LOG.TRACE('Proxy.Map: WILDELSE: ' + k + ' => ' + v);
+			mapcount++; LOG.DEBUG('Proxy.Map: WILDELSE: ' + k + ' => ' + v);
 		}
 		else {
 			let kk = k; if (!k.includes(':')) { kk = 'http://' + k };
@@ -253,7 +253,7 @@ App.InitMap = function () {
 			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
 			if (!k.includes('/')) { up = '!'; }
 			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: HOST: ' + kk + ' => REDEFINED => ' + v); }
-			else { mapcount++; LOG.TRACE('Proxy.Map: HOST: ' + kk + ' => ' + v); }
+			else { mapcount++; LOG.DEBUG('Proxy.Map: HOST: ' + kk + ' => ' + v); }
 			mapout[uh][up] = v;
 		}
 	}
@@ -291,7 +291,7 @@ App.GetSlugHost = function (slug) { let host = slug.replace(/_/g, '.'); let z = 
 App.InitBackend = function (cb) {
 	LOG.DEBUG('App.InitBackend');
 
-	App.Backend = { Endpoint: 'http://' + App.IP + ':' + App.Port, Fastify: fastify({ logger: App.Log, disableRequestLogging:true, maxParamLength: 999, ignoreTrailingSlash: false, }) };
+	App.Backend = { Endpoint: 'http://' + App.IP + ':' + App.Port, Fastify: fastify({ logger: App.Log, disableRequestLogging: true, maxParamLength: 999, ignoreTrailingSlash: false, }) };
 
 	let ff = App.Backend.Fastify;
 	ff.register(fastify_compress);
