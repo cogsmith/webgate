@@ -376,7 +376,7 @@ App.ServerHander = function (req, res) {
 	if (!App.Stats.Hits.Host[req.hostuc]) { App.Stats.Hits.Host[req.hostuc] = 1 } else { App.Stats.Hits.Host[req.hostuc]++ }
 	if (!App.Stats.Hits.IP[req.ip]) { App.Stats.Hits.IP[req.ip] = 1 } else { App.Stats.Hits.IP[req.ip]++ }
 	if (App.Server[stype]._connections > App.Stats.Max.Sockets[stype]) { App.Stats.Max.Sockets[stype] = App.Server[stype]._connections }
-		
+
 	LOG.TRACE({ REQ: { HOST: req.host, URL: req.url } });
 
 	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { req.forproxy = true; if (req.urlz) { req.url = req.urlz.pathname; } }
@@ -432,7 +432,7 @@ App.ServerHander = function (req, res) {
 	let logto = (ttype ? ttype + ' => ' : ''); if (t != tfull) { logto += tfull + ' => '; }; logto += t;
 	if (Number.isInteger(t)) { try { logto = t + ' => ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { logto = t + ' => 500 => ' + http.STATUS_CODES[500].toUpperCase(); t = 500; } };
 	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
-	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => ')).replaceAll(':DENY', ':' + chalk.red('DENY'));
+	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => ')).replaceAll('DENY:', chalk.red('DENY:'));
 	LOG.INFO(logmsg);
 
 	if (t == 'ALL') { t = map.ALL; }
