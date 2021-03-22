@@ -376,33 +376,15 @@ App.ServerHander = function (req, res) {
 	if (!App.Stats.Hits.Host[req.hostuc]) { App.Stats.Hits.Host[req.hostuc] = 1 } else { App.Stats.Hits.Host[req.hostuc]++ }
 	if (!App.Stats.Hits.IP[req.ip]) { App.Stats.Hits.IP[req.ip] = 1 } else { App.Stats.Hits.IP[req.ip]++ }
 	if (App.Server[stype]._connections > App.Stats.Max.Sockets[stype]) { App.Stats.Max.Sockets[stype] = App.Server[stype]._connections }
-
-	let reqhost = (req.headers.host || 'NXDOMAIN').toUpperCase();
-	let port = 9001;
-	let target = false; // ='http://'+App.Args.toip+':'+port;
-
-	let toip = App.Args.toip || '127.0.0.1';
-	if (req.url.startsWith('/.well-known')) { target = 'http://' + toip + ':89'; }
-	let to = toip;
-
+		
 	LOG.TRACE({ REQ: { HOST: req.host, URL: req.url } });
 
-	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { req.forproxy = true; req.url = req.urlz.pathname; }
+	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { req.forproxy = true; if (req.urlz) { req.url = req.urlz.pathname; } }
 
 	let url = stypelc + '://' + req.host + req.url;
 
 	LOG.TRACE(chalk.white(req.ip) + ' ' + req.method + ' ' + url, { Admin: req.admin, Open: { HTTP: App.Server.HTTP._connections, HTTPS: App.Server.HTTPS._connections } });
 	LOG.TRACE(chalk.white(req.ip) + ' ' + req.method + ' ' + url, { Admin: req.admin, Method: req.method, URL: url, Headers: req.headers });
-	LOG.TRACE({ Stats: App.Stats });
-
-	if (1 && req.admin) {
-		if (req.url.startsWith('/zx/px/port/')) { target = 'http://' + to + ':' + req.url.split('/').splice(4); }
-		if (req.url.startsWith('/zx/px/http/')) { let goto = req.url.split('/').splice(4).join('/'); req.url = '/'; target = 'http://' + goto; }
-		if (req.url.startsWith('/zx/px/https/')) { let goto = req.url.split('/').splice(4).join('/'); req.url = '/'; target = 'https://' + goto; }
-	}
-
-	if (req.url.startsWith('/blog')) { req.url = req.url.substr(5); target = 'http://' + toip + ':9001'; }
-	else if (req.url.startsWith('/blog/')) { req.url = req.url.substr(6); target = 'http://' + toip + ':9001'; }
 
 	let map = App.Map; // map = {};
 
