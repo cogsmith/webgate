@@ -453,22 +453,20 @@ App.ServerHander = function (req, res) {
 
 	if (!isNaN(t)) { t = Number.parseInt(t); }
 
-	if (typeof (t) == 'number') { res.statusCode = t; res.end(t + "\n"); }
-	else if (t == 'BADURL' || t == 'DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(res.statusCode + "\n"); return; }
+	if (typeof (t) == 'number') { res.statusCode = t; res.end(); }
+	else if (t == 'BADURL' || t == 'DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(''); return; }
 	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
-	else if (t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
+	else if (t == '404' || t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
 	else if (t == 'ERROR') { res.statusCode = 500; res.end('ERROR' + "\n"); }
 	else if (t == 'OK') { res.statusCode = 200; res.end('OK' + "\n"); }
-	else if (t == 'DENY') { res.statusCode = 403; res.end('' + "\n"); }
+	else if (t == 'DENY') { res.statusCode = 403; res.end(); }
 	else if (t == 'TEAPOT') { res.statusCode = 418; res.end('TEAPOT' + "\n"); }
-	else if (t == 'PROXY') { LOG.WARN(req.url); App.Proxy.web(req, res, { target: u.href }); }
+	else if (t == 'PROXY') { App.Proxy.web(req, res, { target: u.href }); }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'BACKEND-ADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); } else { res.statusCode = 404; res.end('404' + "\n"); } }
 	else if (t == 'ACME') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'WEBFILES') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
-	else if (t == 'INFO') {
-		try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); }
-	}
+	else if (t == 'INFO') { try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); } }
 	else if (t && t.startsWith('>')) {
 		t = t.substring(1);
 		if (!t.includes(':')) { t = 'http://' + t };
