@@ -360,6 +360,13 @@ App.InitProxyServer = function () {
 
 //
 
+App.EndRequest = function (req,res,code) {
+	if (code=500) { res.socket.end(); return; }
+	res.statusCode = code;
+	res.shouldKeepAlive = false; 
+	res.end();
+}
+
 App.ServerHander = function (req, res) {
 	let stype = 'HTTP'; if (req.socket.encrypted) { stype = 'HTTPS'; } let stypelc = stype.toLowerCase();
 
@@ -380,6 +387,8 @@ App.ServerHander = function (req, res) {
 	LOG.TRACE({ REQ: { HOST: req.host, URL: req.url } });
 
 	if (req.url.startsWith('http://') || req.url.startsWith('https://')) { req.forproxy = true; if (req.urlz) { req.url = req.urlz.pathname; } }
+
+	if (req.url=='/wp-login.php') { req.badurl = true; }
 
 	let url = stypelc + '://' + req.host + req.url;
 
@@ -433,7 +442,8 @@ App.ServerHander = function (req, res) {
 	if (Number.isInteger(t)) { try { logto = t + ' => ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { logto = t + ' => 500 => ' + http.STATUS_CODES[500].toUpperCase(); t = 500; } };
 	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
 	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => ')).replaceAll('DENY:', chalk.red('DENY:'));
-	LOG.INFO(logmsg);
+	let loglinelevel = 'INFO'; if (req.badurl) { loglinelevel='TRACE'; };
+	LOG[loglinelevel](logmsg);
 
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
