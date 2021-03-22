@@ -159,8 +159,7 @@ App.InitDone = function () {
 		else { LOG.WARN('ACME.Warning: With no MAP FROM entries found, any host that resolves to your PublicIP will generate certificate requests: ' + App.PublicIP); }
 	}
 
-	if (App.Args.initonly) { App.Exit('App.InitOnly: Exiting Now'); return; }
-	setTimeout(App.Main, 9);
+	if (App.Args.initonly) { App.Exit('App.InitOnly: Exiting Now'); return; } else { setTimeout(App.Main, 9); }
 }
 
 //
@@ -217,7 +216,7 @@ App.InitMap = function () {
 		'local.zxdns.net': 'BACKEND-ADMIN',
 	};
 
-	// map['/_/*'] = 'BACKEND-ADMIN';
+	// map['/_/gate/*'] = 'BACKEND-ADMIN';
 	if (App.PrivateIP) { map[App.PrivateIP] = 'BACKEND-ADMIN'; }
 
 	//if (map['!/*']) { map['ELSE'] = map['!']; delete map['!']; }
@@ -405,7 +404,6 @@ App.ServerHander = function (req, res) {
 	if (req.url.startsWith('/blog')) { req.url = req.url.substr(5); target = 'http://' + toip + ':9001'; }
 	else if (req.url.startsWith('/blog/')) { req.url = req.url.substr(6); target = 'http://' + toip + ':9001'; }
 
-
 	let map = App.Map; // map = {};
 
 	let u = new URL(url); let uhost = u.host.toUpperCase();
@@ -442,7 +440,6 @@ App.ServerHander = function (req, res) {
 
 	let tfull = t;
 
-
 	if (!req.ip) { t = 'ERROR'; }
 
 	if (typeof t == 'string' && t.includes(' || ')) { t = App.Balancer.Get(t); }
@@ -455,7 +452,7 @@ App.ServerHander = function (req, res) {
 	let logto = (ttype ? ttype + ' => ' : ''); if (t != tfull) { logto += tfull + ' => '; }; logto += t;
 	if (Number.isInteger(t)) { try { logto = t + ' => ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { logto = t + ' => 500 => ' + http.STATUS_CODES[500].toUpperCase(); t = 500; } };
 	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
-	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => ')).replaceAll(':DENY',':'+chalk.red('DENY'));
+	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => ')).replaceAll(':DENY', ':' + chalk.red('DENY'));
 	LOG.INFO(logmsg);
 
 	if (t == 'ALL') { t = map.ALL; }
