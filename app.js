@@ -105,6 +105,7 @@ App.Log.SetLevel = function (level) {
 	if (LOG.level == 'info') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
 	if (LOG.level == 'debug') { LOG.TRACE = NOP; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
 	if (LOG.level == 'trace') { LOG.TRACE = LOG.trace; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
+	return LOG.level;
 }
 
 //
@@ -173,7 +174,7 @@ App.Main = function () {
 App.InitKeys = function () {
 	let count = 0;
 	let list = glob.sync(App.DataPath + '/*');
-	list.forEach((z) => { if (fs.existsSync(z + '/keys/crt')) { count++; LOG.TRACE('App.InitKey: ' + z); } });
+	list.forEach((z) => { if (fs.existsSync(z + '/keys/crt')) { count++; LOG.DEBUG('App.InitKey: ' + z); } });
 	LOG.INFO('Host.Keys: ' + count + ' certificates found');
 }
 
@@ -454,7 +455,7 @@ App.ServerHander = function (req, res) {
 	if (Number.isInteger(t)) { try { logto = t + ' => ' + http.STATUS_CODES[t].toUpperCase(); } catch (ex) { logto = t + ' => 500 => ' + http.STATUS_CODES[500].toUpperCase(); t = 500; } };
 	if (t == 'ALL') { logto = 'ALL' + ' => ' + map.ALL } else if (t == 'ELSE') { logto = 'ELSE' + ' => ' + map.ELSE };
 	let logmsg = (chalk.white(req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => '));
-	LOG.DEBUG(logmsg);
+	LOG.INFO(logmsg);
 
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
