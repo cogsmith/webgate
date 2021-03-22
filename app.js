@@ -487,12 +487,12 @@ App.ServerHander = function (req, res) {
 	else if (t && t.startsWith('@')) {
 		t = t.substring(1);
 		if (!t.includes(':')) { t = 'http://' + t };
-		let p = '/'; p = new URL(t).pathname;
-		req.url = req.url + (p.pathname || '') || '/';
+		let tp = '/'; tp = new URL(t).pathname;
+		req.url = (req.url + (tp.pathname || '')) || '/';
 		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
 	}
 	else {
-		if (!t || t.toUpperCase == 'NULL') { res.statusCode = 500; res.end('NULL' + "\n"); return; }
+		if (!t || t.toUpperCase() == 'NULL') { res.statusCode = 500; res.end('NULL' + "\n"); return; }
 		if (!t.includes(':')) { t = 'http://' + t };
 		let tp = '/'; tp = new URL(t).pathname;
 		req.url = tp.pathname || '/';
