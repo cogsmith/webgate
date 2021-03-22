@@ -1,4 +1,4 @@
-process.onSIGTERM = function () { process.exit(); }; process.on('SIGTERM', process.onSIGTERM);
+process.onSIGTERM = function () { process.exit(); }; process.on('SIGTERM', function () { process.onSIGTERM(); });
 // process.on('uncaughtException', function (err) { console.log("\n"); console.log(err); console.log("\n"); process.exit(1); }); // throw(Error('ERROR'));
 
 const util = require('util');
