@@ -531,7 +531,7 @@ App.ServerHander = function (req, res) {
 		if (!t || t.toUpperCase() == 'NULL') { res.statusCode = 500; res.end('NULL' + "\n"); return; }
 		if (!t.includes(':')) { t = 'http://' + t };
 		let tp = '/'; tp = new URL(t).pathname;
-		req.url = tp.pathname || '/';
+		// req.url = tp.pathname || '/';
 		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
 	}
 }
