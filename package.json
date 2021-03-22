@@ -1,5 +1,5 @@
 {
-	"version": "0.1.1",
+	"version": "0.1.2",
 	"namelong": "WEBGATE",
 	"nametag": "WEBGATE",
 	"name": "zx-proxy",
@@ -28,6 +28,7 @@
 		"fastify-http-proxy": "^5.0.0",
 		"fastify-static": "^4.0.1",
 		"http-proxy": "^1.18.1",
+		"js-yaml": "^4.0.0",
 		"lodash": "^4.17.21",
 		"nconf": "^0.11.2",
 		"node-forge": "^0.10.0",

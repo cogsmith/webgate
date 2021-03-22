@@ -11,6 +11,7 @@ const https = require('https');
 const tls = require('tls');
 
 const _ = require('lodash');
+const YAML = require('js-yaml');
 const glob = require('glob');
 const pino = require('pino');
 const chalk = require('chalk');
@@ -38,8 +39,8 @@ const AppArgy = yargs(process.argv).wrap(75).help(false).version(false)
 	.usage("\n" + AppMeta.Full + "\n\n" + 'USAGE: node $0 [options]')
 	.group('loglevel', 'Log').describe('loglevel', 'Log Level').default('loglevel', 'info')
 	.group('logpretty', 'Log').describe('logpretty', 'Log Pretty').boolean('logpretty').default('logpretty', true)
-	.describe('ip', 'Bind IP').default('ip', '0.0.0.0')
-	.describe('port', 'Backend Bind Port').default('port', 89)
+	.describe('ip', 'Bind IP').default('ip', process.env.host || '0.0.0.0')
+	.describe('port', 'Backend Bind Port').default('port', process.env.PORT || 89)
 	.describe('port80', 'HTTP Bind Port').default('port80', 80)
 	.describe('port443', 'HTTPS Bind Port').default('port443', 443)
 	.describe('acme', 'ACME Endpoint').default('acme', 'letsencrypt-production')
@@ -49,8 +50,8 @@ const AppArgy = yargs(process.argv).wrap(75).help(false).version(false)
 	.describe('datapath', 'Data Path').default('datapath', '/webgate')
 	.group('to', 'Proxy Map').describe('to', 'Map To').default('to', 'INFO').array('to')
 	.group('from', 'Proxy Map').describe('from', 'Map From').default('from', null).array('from')
-	.group('map', 'Proxy Map').describe('map', 'Map Text').default('map', null)
-	.group('mapfile', 'Proxy Map').describe('mapfile', 'Map File').default('mapfile', null)
+	.group('map', 'Proxy Map').describe('map', 'Map Text').array('map').default('map', null)
+	.group('mapfile', 'Proxy Map').describe('mapfile', 'Map File').array('mapfile').default('mapfile', null)
 	.demandOption([])
 
 //
@@ -183,7 +184,16 @@ App.InitKeys = function () {
 App.InitMap = function () {
 	LOG.DEBUG('App.InitMap');
 
-	let map = {
+	let map = {};
+
+	if (App.Args.mapfile) {
+		for (let i = 0; i < App.Args.mapfile.length; i++) {			
+			let z = App.Args.mapfile[i]; if (!z) { continue; }
+			fs.watch(App.DataPath + '/' + z, (etype, file) => { if (etype == 'change') { setTimeout(App.LoadMaps,99); } });
+		}
+	}
+
+	let mapold = {
 		//ALL: 'PROXY',
 		//ALL: 'INFO',
 		//ALL: 'TEAPOT',
@@ -227,51 +237,11 @@ App.InitMap = function () {
 	// map['/_/gate/*'] = 'BACKEND-ADMIN';
 	if (App.PrivateIP) { map[App.PrivateIP] = 'BACKEND-ADMIN'; }
 
-	//if (map['!/*']) { map['ELSE'] = map['!']; delete map['!']; }
-
-	if (map['!']) { map['ELSE'] = map['!']; delete map['!']; }
-	if (map['*']) { map['ALL'] = map['*']; delete map['*']; }
-	//if (map.ALL) { map = { ALL: map.ALL }; }
-
-	//map = {};
-
-	let mapcount = 0; let hostcount = 0;
-	let mapout = {}; let mapkeys = Object.keys(map);
-	for (let i = 0; i < mapkeys.length; i++) {
-		let k = mapkeys[i]; let v = map[k];
-
-		if (k.startsWith('/')) { k = '*' + k; }
-
-		let u = k;
-
-		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.DEBUG('Proxy.Map: ALL => ' + v); }
-		else if (k == 'ELSE') { mapout['ELSE'] = v; mapcount++; LOG.DEBUG('Proxy.Map: ELSE => ' + v); }
-		else if (k.startsWith('*')) {
-			if (!mapout['WILDCARD']) { mapout['WILDCARD'] = {} }
-			if (k == '*/*') { mapout['WILDCARD']['*'] = v; } else { mapout['WILDCARD'][k.substr(1)] = v; }
-			mapcount++; LOG.DEBUG('Proxy.Map: WILDCARD: ' + k + ' => ' + v);
-		}
-		else if (k.startsWith('!')) {
-			if (!mapout['WILDELSE']) { mapout['WILDELSE'] = {} }
-			if (k == '!/*') { mapout['WILDELSE']['*'] = v; } else { mapout['WILDELSE'][k.substr(1)] = v; }
-			mapcount++; LOG.DEBUG('Proxy.Map: WILDELSE: ' + k + ' => ' + v);
-		}
-		else {
-			let kk = k; if (!k.includes(':')) { kk = 'http://' + k };
-			let u = new URL(kk); let up = u.pathname; let uh = u.host.toUpperCase();
-			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
-			if (!k.includes('/')) { up = '!'; }
-			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: HOST: ' + kk + ' => REDEFINED => ' + v); }
-			else { mapcount++; LOG.DEBUG('Proxy.Map: HOST: ' + kk + ' => ' + v); }
-			mapout[uh][up] = v;
-		}
-	}
-
-	let maptext = 'MAPTEXT';
-	LOG.DEBUG('Proxy.Map: ' + hostcount + ' Hosts / ' + mapcount + ' Routes' + "\n" + chalk.white(maptext) + "\n" + chalk.white(util.inspect(mapout, { colors: true, depth: null, breakLength: 1 })));
-	LOG.INFO('Proxy.Map: ' + hostcount + ' Hosts / ' + mapcount + ' Routes');
+	let mapout = App.ParseMap(map);
 
 	App.Map = mapout;
+
+	App.LoadMaps();
 }
 
 App.InitProxy = function () {
@@ -354,6 +324,90 @@ App.InitBackend = function (cb) {
 	})
 
 	ff.log.infomute = ff.log.info; ff.log.info = ff.log.trace; ff.listen(89, '127.0.0.1', (err, address) => { ff.log.info = ff.log.infomute; if (err) { LOG.ERROR(err); } else { App.BackendStatus = 'UP'; setTimeout(cb, 9); } });
+}
+
+//
+
+App.LoadMaps = function () {
+	let maptext = '';
+	if (App.Args.mapfile) {
+		for (let i = 0; i < App.Args.mapfile.length; i++) {
+			let z = App.Args.mapfile[i]; if (!z) { continue; }
+			let txt = fs.readFileSync(App.DataPath + '/' + z).toString().trim();
+			maptext += txt + "\n";
+		}
+	}
+	if (App.Args.map) {
+		for (let i = 0; i < App.Args.map.length; i++) {
+			let z = App.Args.map[i];
+			if (!z) { continue; }
+			maptext += z + "\n";
+		}
+	}
+	maptext = maptext.trim();
+	App.Map = App.ParseMap(App.LoadMapText(maptext));
+}
+
+App.LoadMapText = function (yaml) {
+	LOG.DEBUG('App.LoadMapText: ' + "\n" + chalk.white(yaml));
+	let out = YAML.load(yaml);
+	return out;
+}
+
+App.LoadMapFile = function (file) {
+	LOG.DEBUG('App.LoadMapFile: ' + file);
+	let yaml = fs.readFileSync(App.DataPath + '/' + file);
+	let out = App.LoadMapText(yaml);
+	return out;
+}
+
+App.ParseMap = function (map) {
+	//if (map['!/*']) { map['ELSE'] = map['!']; delete map['!']; }
+
+	if (!map) { map = {}; }
+
+	if (map['!']) { map['ELSE'] = map['!']; delete map['!']; }
+	if (map['*']) { map['ALL'] = map['*']; delete map['*']; }
+	//if (map.ALL) { map = { ALL: map.ALL }; }
+
+	//map = {};
+
+	let mapcount = 0; let hostcount = 0;
+	let mapout = {}; let mapkeys = Object.keys(map);
+	for (let i = 0; i < mapkeys.length; i++) {
+		let k = mapkeys[i]; let v = map[k];
+
+		if (k.startsWith('/')) { k = '*' + k; }
+
+		let u = k;
+
+		if (k == 'ALL') { mapout['ALL'] = v; mapcount++; LOG.DEBUG('Proxy.Map: ALL => ' + v); }
+		else if (k == 'ELSE') { mapout['ELSE'] = v; mapcount++; LOG.DEBUG('Proxy.Map: ELSE => ' + v); }
+		else if (k.startsWith('*')) {
+			if (!mapout['WILDCARD']) { mapout['WILDCARD'] = {} }
+			if (k == '*/*') { mapout['WILDCARD']['*'] = v; } else { mapout['WILDCARD'][k.substr(1)] = v; }
+			mapcount++; LOG.DEBUG('Proxy.Map: WILDCARD: ' + k + ' => ' + v);
+		}
+		else if (k.startsWith('!')) {
+			if (!mapout['WILDELSE']) { mapout['WILDELSE'] = {} }
+			if (k == '!/*') { mapout['WILDELSE']['*'] = v; } else { mapout['WILDELSE'][k.substr(1)] = v; }
+			mapcount++; LOG.DEBUG('Proxy.Map: WILDELSE: ' + k + ' => ' + v);
+		}
+		else {
+			let kk = k; if (!k.includes(':')) { kk = 'http://' + k };
+			let u = new URL(kk); let up = u.pathname; let uh = u.host.toUpperCase();
+			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
+			if (!k.includes('/')) { up = '!'; }
+			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: HOST: ' + kk + ' => REDEFINED => ' + v); }
+			else { mapcount++; LOG.DEBUG('Proxy.Map: HOST: ' + kk + ' => ' + v); }
+			mapout[uh][up] = v;
+		}
+	}
+
+	LOG.DEBUG('Proxy.Map: ' + hostcount + ' Hosts / ' + mapcount + ' Routes' + "\n" + chalk.white(util.inspect(mapout, { colors: true, depth: null, breakLength: 1 })));
+	LOG.INFO('Proxy.Map: ' + hostcount + ' Hosts / ' + mapcount + ' Routes');
+
+	return mapout;
 }
 
 //
@@ -516,6 +570,7 @@ App.SNI = function (host, cb) {
 App.GetCert = function (domain) {
 	domain = domain.toUpperCase();
 	LOG.TRACE('GetCert: ' + domain);
+	if (domain=='GATE.TEST') { domain = 'LOCALHOST'; }
 	if (App.CertDB.Data[domain]) { LOG.TRACE('GetCert.Cached: ' + domain); return App.CertDB.Data[domain]; }
 	else {
 		let slug = App.GetHostSlug(domain);
