@@ -188,7 +188,9 @@ App.InitMap = function () {
 	if (App.Args.mapfile) {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
-			fs.watch(App.DataPath + '/' + z, (etype, file) => { if (etype == 'change') { setTimeout(App.LoadMaps, 99); } });
+			fs.watch(App.DataPath + '/' + z, (etype, file) => {
+				if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } }
+			});
 		}
 	}
 
@@ -245,7 +247,6 @@ App.InitMap = function () {
 
 App.InitProxy = function () {
 	LOG.DEBUG('App.InitProxy');
-
 	App.Proxy = nodeproxy.createProxyServer({});
 
 	App.Proxy.on('open', function (socket) { });
@@ -316,8 +317,7 @@ App.InitBackend = function (cb) {
 
 	ff.get('/zx/px/acme', (req, rep) => {
 		if (!req.admin) { rep.code(404).send('Z404'); }
-		//LOG.WARN('PX.Acme'); LOG.DEBUG({ IP: req.socket.remoteAddress, Q: req.query, A: App.AdminIP });
-		//if (!App.AdminIP.includes(req.socket.remoteAddress)) { return rep.send('NO'); }
+		LOG.WARN('PX.Acme'); LOG.DEBUG({ IP: req.socket.remoteAddress, Q: req.query, A: App.AdminIP });
 		let acmedomain = 'localhost'; if (req.query.acme) { acmedomain = req.query.acme; }
 		rep.send('PX:ACME:' + req.hostname + "\n" + App.GetCert(acmedomain));
 	})
@@ -327,7 +327,9 @@ App.InitBackend = function (cb) {
 
 //
 
+App.LoadMapsTimeout = false;
 App.LoadMaps = function () {
+	App.LoadMapsTimeout = false;
 	let maptext = '';
 	if (App.Args.mapfile) {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
@@ -338,8 +340,7 @@ App.LoadMaps = function () {
 	}
 	if (App.Args.map) {
 		for (let i = 0; i < App.Args.map.length; i++) {
-			let z = App.Args.map[i];
-			if (!z) { continue; }
+			let z = App.Args.map[i]; if (!z) { continue; }
 			maptext += z + "\n";
 		}
 	}
