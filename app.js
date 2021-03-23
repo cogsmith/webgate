@@ -547,7 +547,7 @@ App.SNI = function (host, cb) {
 
 	let cert = App.GetCert(host);
 	if (cert) { cb(null, cert.Context); return; }
-	else if (!App.Map[host]) { LOG.WARN('SNI.Deny: '+host+' Not Listed In Routing Map'); cb(null,Error('SNI:NOMAP')); }
+	else if (!App.Map[host]) { LOG.DEBUG('SNI.Deny: '+host+' Not Listed In Routing Map'); cb(null,Error('SNI:NOMAP')); }
 	else {
 		if (!App.PublicIP[0] || (App.PublicIP[0] == 'SKIPDNS')) {
 			LOG.DEBUG('SNI: Skipping DNS Verify Because PublicIP = ' + App.PublicIP[0]);
