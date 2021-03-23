@@ -330,6 +330,7 @@ App.InitBackend = function (cb) {
 App.LoadMapsTimeout = false;
 App.LoadMaps = function () {
 	App.LoadMapsTimeout = false;
+
 	let maptext = '';
 	if (App.Args.mapfile) {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
@@ -345,6 +346,7 @@ App.LoadMaps = function () {
 		}
 	}
 	maptext = maptext.trim();
+
 	App.Map = App.ParseMap(App.LoadMapText(maptext));
 }
 
@@ -545,6 +547,7 @@ App.SNI = function (host, cb) {
 
 	let cert = App.GetCert(host);
 	if (cert) { cb(null, cert.Context); return; }
+	else if (!App.Map[host]) { LOG.WARN('SNI.Deny: '+host+' Not Listed In Routing Map'); cb(null,Error('SNI:NOMAP')); }
 	else {
 		if (!App.PublicIP[0] || (App.PublicIP[0] == 'SKIPDNS')) {
 			LOG.DEBUG('SNI: Skipping DNS Verify Because PublicIP = ' + App.PublicIP[0]);
