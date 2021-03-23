@@ -189,7 +189,7 @@ App.InitMap = function () {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
 			fs.watch(App.DataPath + '/' + z, (etype, file) => {
-				if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } }
+				if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 2500); } }
 			});
 		}
 	}
