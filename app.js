@@ -73,10 +73,7 @@ const App = {
 App.Exit = function (z, data) {
 	let exit = { code: 0, error: false, silent: false, message: 'App.Exit' };
 	if (z && z.stack) { exit.error = z; exit.code = 1; exit.msg = 'App.Exit ' + chalk.white(z.message); z.message = exit.msg; LOG.ERROR(z); LOG.ERROR(exit.msg, _.merge({ ExitCode: exit.code }, data)); }
-	else {
-		if (Number.isInteger(z)) { exit.code = z; } else if (typeof (z) == 'string') { exit.message = 'App.Exit ' + chalk.white(z); } else if (z) { exit = z; }
-		if (!exit.silent) { LOG.DEBUG(exit.message, _.merge({ ExitCode: exit.code }, data)); }
-	}
+	else { if (Number.isInteger(z)) { exit.code = z; } else if (typeof (z) == 'string') { exit.message = 'App.Exit ' + chalk.white(z); } else if (z) { exit = z; } if (!exit.error) { delete exit.error; } if (!exit.silent) { LOG.DEBUG(exit.message, _.merge(exit, data)); } }
 	process.exit(exit.code);
 }
 
@@ -104,6 +101,13 @@ App.Log.SetLevel = function (level) {
 	if (LOG.level == 'trace') { LOG.TRACE = LOG.trace; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
 	return LOG.level;
 }
+
+App.Exit();
+//App.Exit(0);
+//App.Exit(1);
+//App.Exit('EXIT');
+//App.Exit(Error('ERROR'));
+
 
 //
 
@@ -633,8 +637,7 @@ App.RequestCert = function (domain, cb) {
 		App.WriteCert(slug, { CSR: csr, KEY: key });
 
 		const client = new acme.Client({ accountKey: akey, directoryUrl: App.ACME.Endpoint });
-		let crt = false;
-		try { crt = await client.auto({ csr: csr, challengeCreateFn: acmeCreate, challengeRemoveFn: acmeRemove, termsOfServiceAgreed: true, email: 'contact@' + domain }); }
+		let crt = false; try { crt = await client.auto({ csr: csr, challengeCreateFn: acmeCreate, challengeRemoveFn: acmeRemove, termsOfServiceAgreed: true, email: 'contact@' + domain }); }
 		catch (ex) { LOG.WARN({ msg: 'RequestCert.Failed: ' + domain + ' = ACME: ' + ex.message }); cb(null, Error('SNI:ACMEFAIL')); return; }
 		if (crt) { LOG.INFO('RequestCert.Success: ' + domain); App.WriteCert(slug, { CRT: crt }); cb(null, App.GetCert(domain).Context); return; }
 	}
