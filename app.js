@@ -102,13 +102,6 @@ App.Log.SetLevel = function (level) {
 	return LOG.level;
 }
 
-App.Exit();
-//App.Exit(0);
-//App.Exit(1);
-//App.Exit('EXIT');
-//App.Exit(Error('ERROR'));
-
-
 //
 
 App.GetHostSlug = function (host) { let slug = host.replace(/\./g, '_').toUpperCase(); let z = slug.split('_'); if (z.length >= 3) { slug = z.slice(-2).join('_') + '_' + z.slice(0, z.length - 2).reverse().join('_'); }; return slug; };
