@@ -187,7 +187,7 @@ App.InitMap = function () {
 
 	let map = {};
 
-	App.WatchMaps();
+	// App.WatchMaps();
 
 	let mapold = {
 		//ALL: 'PROXY',
@@ -328,7 +328,7 @@ App.WatchMaps = function () {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
 			let f = App.DataPath + '/' + z;
 			if (App.MapWatchers[f]) { App.MapWatchers[f].close(); }
-			try { App.MapWatchers = fs.watch(f, (etype, file) => { if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } } }); } catch (ex) { LOG.ERROR(ex); }
+			try { App.MapWatchers = fs.watch(f, (etype, file) => { if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } } }); } catch (ex) { /* LOG.TRACE(ex); */ }
 		}
 	}
 }
@@ -344,8 +344,8 @@ App.LoadMaps = function () {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
 			let f = App.DataPath + '/' + z;
-			LOG.DEBUG('App.LoadMapFile: '+f);
-			let txt = ''; try { fs.readFileSync(f).toString().trim(); } catch (ex) { LOG.ERROR('App.LoadMapFile: ReadError: ' + f); }
+			LOG.DEBUG('App.LoadMapFile: ' + f);
+			let txt = ''; try { txt = fs.readFileSync(f).toString().trim(); } catch (ex) { LOG.ERROR('App.LoadMapFile: ' + f + ' FAILED'); }
 			maptext += txt + "\n";
 		}
 	}
