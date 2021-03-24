@@ -3,15 +3,14 @@
 
 ---
 
-:octocat: https://github.com/cogsmith/hive-proxy
+:octocat: https://github.com/cogsmith/webgate
 
-🐳 https://hub.docker.com/r/cogsmith/hive-proxy
+🐳 https://hub.docker.com/r/cogsmith/webgate
 
 ---
 
-<h1><code><a href='https://github.com/cogsmith/hive-proxy/blob/main/app.js'>📄 [VIEW APP SOURCE CODE]</a></code></h1>
+<h1><code><a href='https://github.com/cogsmith/webgate/blob/main/app.js'>📄 [VIEW APP SOURCE CODE]</a></code></h1>
 
 ---
 
 ![SCREENSHOT](SCREENSHOT.PNG)
-
