@@ -411,6 +411,7 @@ App.ParseMap = function (map) {
 		}
 		else {
 			let kk = k; if (!k.includes(':')) { kk = 'http://' + k };
+			console.log('K = ' + k); console.log({ U: { HOST: u.host, PATHNAME: u.pathname } });
 			let u = new URL(kk); let up = u.pathname; let uh = u.host.toUpperCase();
 			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
 			if (!k.includes('/')) { up = '!'; }
