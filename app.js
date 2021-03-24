@@ -104,8 +104,10 @@ App.Log.SetLevel = function (level) {
 
 //
 
-App.GetHostSlug = function (host) { let slug = host.replace(/\./g, '_').toUpperCase(); let z = slug.split('_'); if (z.length >= 3) { slug = z.slice(-2).join('_') + '_' + z.slice(0, z.length - 2).reverse().join('_'); }; return slug; };
-App.GetSlugHost = function (slug) { let host = slug.replace(/_/g, '.'); let z = slug.split('_'); if (z.length >= 2) { host = z.slice(2).reverse().join('.') + '.' + z.slice(0, 2).join('.'); }; return host; };
+App.GetHostSlug = function (host) { if (!host) { return host; } let slug = host.replace(/\./g, '_').toUpperCase(); let z = slug.split('_'); if (z.length >= 3) { slug = z.slice(-2).join('_') + '_' + z.slice(0, z.length - 2).reverse().join('_'); }; return slug; };
+//App.GetSlugHost = function (slug) { if (!slug) { return slug; } let host = slug.replace(/_/g, '.'); let z = slug.split('_'); if (z.length >= 2) { host = z.slice(2).reverse().join('.') + '.' + z.slice(0, 2).join('.'); }; return host.split('/')[0]; }
+
+App.GetSlugHost = function (slug) { if (!slug) { return slug; } let host = slug.replace(/_/g, '.'); let z = slug.split('_'); if (z.length >= 2) { host = _.concat(z.slice(2).reverse(), z.slice(0, 2)).join('.'); }; return host.split('/')[0]; };
 
 //
 
@@ -411,8 +413,8 @@ App.ParseMap = function (map) {
 		}
 		else {
 			let kk = k; if (!k.includes(':')) { kk = 'http://' + k };
-			console.log('K = ' + k); console.log({ U: { HOST: u.host, PATHNAME: u.pathname } });
 			let u = new URL(kk); let up = u.pathname; let uh = u.host.toUpperCase();
+			console.log('K = ' + k); console.log({ U: { HOST: u.host, PATHNAME: u.pathname } });
 			if (!mapout[uh]) { mapout[uh] = {}; hostcount++; }
 			if (!k.includes('/')) { up = '!'; }
 			if (mapout[uh][up]) { LOG.WARN('Proxy.Map: HOST: ' + kk + ' => REDEFINED => ' + v); }
