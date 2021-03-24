@@ -187,17 +187,6 @@ App.InitMap = function () {
 
 	let map = {};
 
-	App.WatchMaps = function () {
-		if (App.Args.mapfile) {
-			for (let i = 0; i < App.Args.mapfile.length; i++) {
-				let z = App.Args.mapfile[i]; if (!z) { continue; }
-				let f = App.DataPath + '/' + z;
-				if (App.MapWatchers[f]) { App.MapWatchers[f].close(); }
-				App.MapWatchers = fs.watch(f, (etype, file) => { if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } } });
-			}
-		}	
-	}
-
 	App.WatchMaps();
 
 	let mapold = {
@@ -333,6 +322,17 @@ App.InitBackend = function (cb) {
 
 //
 
+App.WatchMaps = function () {
+	if (App.Args.mapfile) {
+		for (let i = 0; i < App.Args.mapfile.length; i++) {
+			let z = App.Args.mapfile[i]; if (!z) { continue; }
+			let f = App.DataPath + '/' + z;
+			if (App.MapWatchers[f]) { App.MapWatchers[f].close(); }
+			try { App.MapWatchers = fs.watch(f, (etype, file) => { if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } } }); } catch (ex) { LOG.ERROR(ex); }
+		}
+	}
+}
+
 App.LoadMapsTimeout = false;
 App.LoadMaps = function () {
 	App.LoadMapsTimeout = false;
@@ -343,7 +343,7 @@ App.LoadMaps = function () {
 	if (App.Args.mapfile) {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
-			let txt = fs.readFileSync(App.DataPath + '/' + z).toString().trim();
+			let txt = ''; try { fs.readFileSync(App.DataPath + '/' + z).toString().trim(); } catch (ex) { LOG.ERROR(ex); }
 			maptext += txt + "\n";
 		}
 	}
@@ -555,7 +555,7 @@ App.SNI = function (host, cb) {
 
 	let cert = App.GetCert(host);
 	if (cert) { cb(null, cert.Context); return; }
-	else if (!App.Map[host]) { LOG.DEBUG('SNI.Deny: '+host+' Not Listed In Routing Map'); cb(null,Error('SNI:NOMAP')); }
+	else if (!App.Map[host]) { LOG.DEBUG('SNI.Deny: ' + host + ' Not Listed In Routing Map'); cb(null, Error('SNI:NOMAP')); }
 	else {
 		if (!App.PublicIP[0] || (App.PublicIP[0] == 'SKIPDNS')) {
 			LOG.DEBUG('SNI: Skipping DNS Verify Because PublicIP = ' + App.PublicIP[0]);
