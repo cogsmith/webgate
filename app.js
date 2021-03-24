@@ -186,50 +186,7 @@ App.InitMap = function () {
 	LOG.DEBUG('App.InitMap');
 
 	let map = {};
-
-	// App.WatchMaps();
-
-	let mapold = {
-		//ALL: 'PROXY',
-		//ALL: 'INFO',
-		//ALL: 'TEAPOT',
-		//ALL: 'HANGUP',
-		//ALL: 'ERROR',		
-		NOHOST: 'ERROR',
-		ELSE: '404',
-		//'!/': 'INFO',
-		//'gate.test': 'BACKEND-ADMIN',
-		'!/gate/test': 'INFO || NOTFOUND || NOMAP || 404 || OK || ERROR || DENY || HANGUP || TEAPOT',
-		//'!/*': 'TEAPOT',
-		'*/.well-known/*': 'ACME',
-		'!/favicon.ico': 'WEBFILES',
-		'!/teapot': 'TEAPOT',
-		'example.com': 'HANGUP',
-		'example.com/': '>https://en.wikipedia.org/wiki/Example.com',
-
-		'*/wp-login.php': 'BADURL',
-		'*/.env': 'BADURL',
-
-		'myjuketube.com': 'https://www.youxube.com',
-		'www.myjuketube.com': 'https://www.youxube.com',
-
-		'*/zx/px/port/9001': 'http://' + App.PrivateIP + ':9001',
-		'*/zx/px/port/9002': 'http://' + App.PrivateIP + ':9002',
-		'*/zx/px/port/9003': 'http://' + App.PrivateIP + ':9003',
-		'*/zx/px/port/9004': 'http://' + App.PrivateIP + ':9004',
-		'*/zx/px/port/9005': 'http://' + App.PrivateIP + ':9005',
-		'*/zx/px/port/9006': 'http://' + App.PrivateIP + ':9006',
-		'*/zx/px/port/9007': 'http://' + App.PrivateIP + ':9007',
-		'*/zx/px/port/9008': 'http://' + App.PrivateIP + ':9008',
-		'*/zx/px/port/9009': 'http://' + App.PrivateIP + ':9009',
-
-		'/_/gate/*': 'INFO',
-
-		'localhost/google': '@google.com',
-
-		'local.zxdns.net': 'BACKEND-ADMIN',
-	};
-
+	
 	// map['/_/gate/*'] = 'BACKEND-ADMIN';
 	if (App.PrivateIP) { map[App.PrivateIP] = 'BACKEND-ADMIN'; }
 
