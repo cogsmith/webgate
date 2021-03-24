@@ -366,7 +366,8 @@ App.LoadMaps = function () {
 
 App.LoadMapText = function (yaml) {
 	LOG.DEBUG('App.LoadMapText: ' + "\n" + chalk.white(yaml));
-	let out = YAML.load(yaml);
+	let out = false;
+	try { out = YAML.load(yaml); } catch (ex) { LOG.ERROR(ex); }
 	return out;
 }
 
