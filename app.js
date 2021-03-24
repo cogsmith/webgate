@@ -344,7 +344,8 @@ App.LoadMaps = function () {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
 			let f = App.DataPath + '/' + z;
-			let txt = ''; try { fs.readFileSync(f).toString().trim(); } catch (ex) { LOG.ERROR('App.LoadMaps: MAP File Read Error: ' + f); }
+			LOG.DEBUG('App.LoadMapFile: '+f);
+			let txt = ''; try { fs.readFileSync(f).toString().trim(); } catch (ex) { LOG.ERROR('App.LoadMapFile: ReadError: ' + f); }
 			maptext += txt + "\n";
 		}
 	}
