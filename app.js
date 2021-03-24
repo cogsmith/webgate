@@ -339,6 +339,8 @@ App.LoadMaps = function () {
 
 	App.WatchMaps();
 
+	let mapmap = {};
+
 	let maptext = '';
 	if (App.Args.mapfile) {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
@@ -347,17 +349,19 @@ App.LoadMaps = function () {
 			LOG.DEBUG('App.LoadMapFile: ' + f);
 			let txt = ''; try { txt = fs.readFileSync(f).toString().trim(); } catch (ex) { LOG.ERROR('App.LoadMapFile: ' + f + ' = FAIL'); }
 			maptext += txt + "\n";
+			mapmap = _.merge(mapmap, App.LoadMapText(txt));
 		}
 	}
 	if (App.Args.map) {
 		for (let i = 0; i < App.Args.map.length; i++) {
 			let z = App.Args.map[i]; if (!z) { continue; }
 			maptext += z + "\n";
+			mapmap = _.merge(mapmap, App.LoadMapText(txt));
 		}
 	}
 	maptext = maptext.trim();
 
-	App.Map = App.ParseMap(App.LoadMapText(maptext));
+	App.Map = App.ParseMap(mapmap);
 }
 
 App.LoadMapText = function (yaml) {
