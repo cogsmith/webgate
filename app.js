@@ -356,7 +356,7 @@ App.LoadMaps = function () {
 		for (let i = 0; i < App.Args.map.length; i++) {
 			let z = App.Args.map[i]; if (!z) { continue; }
 			maptext += z + "\n";
-			mapmap = _.merge(mapmap, App.LoadMapText(txt));
+			mapmap = _.merge(mapmap, App.LoadMapText(maptext));
 		}
 	}
 	maptext = maptext.trim();
