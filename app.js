@@ -186,7 +186,7 @@ App.InitMap = function () {
 	LOG.DEBUG('App.InitMap');
 
 	let map = {};
-	
+
 	// map['/_/gate/*'] = 'BACKEND-ADMIN';
 	if (App.PrivateIP) { map[App.PrivateIP] = 'BACKEND-ADMIN'; }
 
@@ -342,8 +342,6 @@ App.ParseMap = function (map) {
 	if (map['!']) { map['ELSE'] = map['!']; delete map['!']; }
 	if (map['*']) { map['ALL'] = map['*']; delete map['*']; }
 	//if (map.ALL) { map = { ALL: map.ALL }; }
-
-	//map = {};
 
 	let mapcount = 0; let hostcount = 0;
 	let mapout = {}; let mapkeys = Object.keys(map);
