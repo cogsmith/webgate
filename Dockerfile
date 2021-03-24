@@ -4,4 +4,5 @@ WORKDIR /app
 COPY ["package.json","package-lock.json*","./"]
 RUN npm install --production
 COPY . .
+RUN node --check /app/app.js
 ENTRYPOINT ["node","app.js"]
