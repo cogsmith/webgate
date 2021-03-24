@@ -328,7 +328,7 @@ App.WatchMaps = function () {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
 			let f = App.DataPath + '/' + z;
 			if (App.MapWatchers[f]) { App.MapWatchers[f].close(); }
-			try { App.MapWatchers = fs.watch(f, (etype, file) => { if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } } }); } catch (ex) { /* LOG.TRACE(ex); */ }
+			try { App.MapWatchers = fs.watch(f, (etype, file) => { if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } } }); } catch (ex) { LOG.TRACE('App.WatchMap: ' + f + ' = FAIL'); }
 		}
 	}
 }
@@ -345,7 +345,7 @@ App.LoadMaps = function () {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
 			let f = App.DataPath + '/' + z;
 			LOG.DEBUG('App.LoadMapFile: ' + f);
-			let txt = ''; try { txt = fs.readFileSync(f).toString().trim(); } catch (ex) { LOG.ERROR('App.LoadMapFile: ' + f + ' FAILED'); }
+			let txt = ''; try { txt = fs.readFileSync(f).toString().trim(); } catch (ex) { LOG.ERROR('App.LoadMapFile: ' + f + ' = FAIL'); }
 			maptext += txt + "\n";
 		}
 	}
