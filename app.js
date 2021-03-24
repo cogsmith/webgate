@@ -158,6 +158,8 @@ App.InitData = function () {
 	App.Requests = 0;
 	App.Stats = { Max: { Sockets: { HTTP: 0, HTTPS: 0 } }, Hits: { Host: {}, IP: {}, Total: { HTTP: 0, HTTPS: 0 } } };
 
+	App.MapWatchers = {};
+
 	App.CertDB = function () { };
 	App.CertDB.Data = {};
 	App.CertReqs = {};
@@ -185,14 +187,18 @@ App.InitMap = function () {
 
 	let map = {};
 
-	if (App.Args.mapfile) {
-		for (let i = 0; i < App.Args.mapfile.length; i++) {
-			let z = App.Args.mapfile[i]; if (!z) { continue; }
-			fs.watch(App.DataPath + '/' + z, (etype, file) => {
-				if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 2500); } }
-			});
-		}
+	App.WatchMaps = function () {
+		if (App.Args.mapfile) {
+			for (let i = 0; i < App.Args.mapfile.length; i++) {
+				let z = App.Args.mapfile[i]; if (!z) { continue; }
+				let f = App.DataPath + '/' + z;
+				if (App.MapWatchers[f]) { App.MapWatchers[f].close(); }
+				App.MapWatchers = fs.watch(f, (etype, file) => { if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } } });
+			}
+		}	
 	}
+
+	App.WatchMaps();
 
 	let mapold = {
 		//ALL: 'PROXY',
@@ -330,6 +336,8 @@ App.InitBackend = function (cb) {
 App.LoadMapsTimeout = false;
 App.LoadMaps = function () {
 	App.LoadMapsTimeout = false;
+
+	App.WatchMaps();
 
 	let maptext = '';
 	if (App.Args.mapfile) {
