@@ -492,7 +492,12 @@ App.ServerHander = function (req, res) {
 		res.writeHead(301, { Location: loc });
 		res.end(loc + "\n");
 	}
-	else if (t && t.startsWith('@')) {
+	else if (t && (t.startsWith('@') || t.startsWith('~'))) {
+		if (t.startsWith('~')) { 
+			delete req.headers['x-forwarded-for'];
+			delete req.headers['x-forwarded-host'];
+			delete req.headers['x-forwarded-proto'];
+		}
 		t = t.substring(1);
 		if (!t.includes(':')) { t = 'http://' + t };
 		let tp = '/'; tp = new URL(t).pathname;
