@@ -115,11 +115,11 @@ App.GetSlugHost = function (slug) { if (!slug) { return slug; } let host = slug.
 //
 
 App.Init = async function () {
+	process.onSIGTERM = function () { LOG.WARN('App.Process: SIGTERM'); App.Exit(1); };
+
 	if (App.Args.map || App.Args.mapfile) { App.Args.to = ['MAP']; }
 
 	App.SetInfo('App', function () { return 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE') + ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY') + (App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ') + (App.Args.to[0] ? '> ' + App.Args.to.join(' ') + ' ' : ''); });
-
-	process.onSIGTERM = function () { LOG.WARN('App.Process: SIGTERM'); App.Exit(1); };
 
 	LOG.TRACE({ App: App });
 	LOG.INFO(App.Meta.Full);
