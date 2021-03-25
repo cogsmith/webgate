@@ -271,7 +271,7 @@ App.InitBackend = async function (cb) {
 	ffadmin.get('/zx/px/stats', (req, rep) => {
 		if (!req.admin) { return rep.code(404).send('Z404'); }
 		// rep.send(App.Stats);
-		rep.send( util.inspect(mapout, { colors: true, depth: null, breakLength: 1 }) );
+		rep.send( util.inspect(App.Map, { colors: true, depth: null, breakLength: 1 }) );
 	})
 
 	ffadmin.get('/zx/px/acme', (req, rep) => {
