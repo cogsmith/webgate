@@ -312,7 +312,7 @@ App.InitBackend = async function (cb) {
 
 	//
 
-	await wait(2500);
+	await wait(250);
 }
 
 //
