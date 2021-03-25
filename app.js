@@ -1,9 +1,12 @@
 const NOP = function () { };
-process.onSIGTERM = function () { process.exit(); }; process.on('SIGTERM', function () { process.onSIGTERM(); });
+process.setMaxListeners(999); require('events').EventEmitter.prototype._maxListeners = 999;
 process.on('uncaughtException', function (err) { console.log("\n"); console.log(err); console.log("\n"); process.exit(1); }); // throw(Error('ERROR'));
+process.onSIGTERM = function () { console.log('SIGTERM'); process.exit(); }; process.on('SIGTERM', function () { process.onSIGTERM(); });
 
 const util = require('util');
 const wait = util.promisify(setTimeout);
+
+//
 
 const path = require('path');
 const fs = require('fs');
@@ -125,7 +128,7 @@ App.Init = async function () {
 	LOG.DEBUG('App.Info: ' + chalk.white(App.Info('App')));
 
 	App.InitData();
-	
+
 	await App.InitBackend();
 	App.InitMap();
 	App.InitKeys();
