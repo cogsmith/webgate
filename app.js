@@ -525,9 +525,9 @@ App.ServerHander = function (req, res) {
 	if (typeof t == 'string' && !isNaN(t)) { t = Number.parseInt(t); }
 
 	if (typeof (t) == 'number') { res.statusCode = t; res.end(); }
-	else if (t == '404' || t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
+	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); return; }
 	else if (t == 'BADURL' || t == 'DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(); return; }
-	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
+	else if (t == '404' || t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
 	else if (ttype == 'WWW-301') { res.writeHead(301, { Location: t }); res.end(t + "\n"); }
 	else if (t == 'ERROR') { res.statusCode = 500; res.end('ERROR' + "\n"); }
 	else if (t == 'OK') { res.statusCode = 200; res.end('OK' + "\n"); }
