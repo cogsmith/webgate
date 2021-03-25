@@ -1,8 +1,10 @@
 const NOP = function () { };
 process.onSIGTERM = function () { process.exit(); }; process.on('SIGTERM', function () { process.onSIGTERM(); });
-// process.on('uncaughtException', function (err) { console.log("\n"); console.log(err); console.log("\n"); process.exit(1); }); // throw(Error('ERROR'));
+process.on('uncaughtException', function (err) { console.log("\n"); console.log(err); console.log("\n"); process.exit(1); }); // throw(Error('ERROR'));
 
 const util = require('util');
+const wait = util.promisify(setTimeout);
+
 const path = require('path');
 const fs = require('fs');
 const dns = require('dns');
@@ -109,7 +111,7 @@ App.GetSlugHost = function (slug) { if (!slug) { return slug; } let host = slug.
 
 //
 
-App.Init = function () {
+App.Init = async function () {
 	if (App.Args.map || App.Args.mapfile) { App.Args.to = ['MAP']; }
 
 	App.SetInfo('App', function () { return 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE') + ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY') + (App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ') + (App.Args.to[0] ? '> ' + App.Args.to.join(' ') + ' ' : ''); });
@@ -127,7 +129,9 @@ App.Init = function () {
 	App.InitKeys();
 	App.InitProxy();
 	App.InitServer();
-	App.InitBackend(App.InitDone);
+	await App.InitBackend();
+
+	App.InitDone();
 }
 
 App.InitDone = function () {
@@ -230,7 +234,7 @@ App.InitServer = async function () {
 
 //
 
-App.InitBackend = function (cb) {
+App.InitBackend = async function (cb) {
 	LOG.DEBUG('App.InitBackend');
 
 	//
@@ -300,30 +304,11 @@ App.InitBackend = function (cb) {
 
 	ff.get('/', (req, rep) => { rep.send(App.Meta.Name); });
 
-	ff.get('/zx/px/loglevel', (req, rep) => {
-		if (!req.admin) { return rep.code(404).send('Z404'); }
-		let level = req.query.level || 'trace';
-		rep.send(App.Log.SetLevel(level));
-	})
-
-	ff.get('/zx/px/stats', (req, rep) => {
-		if (!req.admin) { return rep.code(404).send('Z404'); }
-		// rep.send(App.Stats);
-		util.inspect(mapout, { colors: true, depth: null, breakLength: 1 })
-	})
-
-	ff.get('/zx/px/acme', (req, rep) => {
-		if (!req.admin) { rep.code(404).send('Z404'); }
-		LOG.WARN('PX.Acme'); LOG.DEBUG({ IP: req.socket.remoteAddress, Q: req.query, A: App.AdminIP });
-		let acmedomain = 'localhost'; if (req.query.acme) { acmedomain = req.query.acme; }
-		rep.send('PX:ACME:' + req.hostname + "\n" + App.GetCert(acmedomain));
-	})
-
 	ff.log.infomute = ff.log.info; ff.log.info = ff.log.trace; ff.listen(89, '127.0.0.1', (err, address) => { ff.log.info = ff.log.infomute; if (err) { LOG.ERROR(err); } else { App.BackendStatus = 'UP'; } });
 
 	//
 
-	setTimeout(cb,999);
+	await wait(2500);
 }
 
 //
@@ -496,10 +481,9 @@ App.ServerHander = function (req, res) {
 		if (t) { ttype = 'WILDELSE'; }
 	}
 
-	if (!t) {
-		if (t != 'ALL') { if (map.ELSE) { ttype = 'ELSE'; t = 'ELSE'; } else { ttype = 'NOMAP'; t = 'NOMAP'; } }
-	}
+	// if (t != 'ALL') { if (map.ELSE) { ttype = 'ELSE'; t = 'ELSE'; } else { ttype = 'NOMAP'; t = 'NOMAP'; } }
 
+	if (!t) { ttype = 'NOMAP'; t = 'NOMAP'; }
 
 	if (req.hostuc.startsWith('WWW.')) { ttype = 'WWW-301'; t = new URL(stypelc + '://' + req.host.substr(4) + req.url).href; }
 
