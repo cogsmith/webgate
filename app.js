@@ -397,7 +397,7 @@ App.ServerHander = function (req, res) {
 	req.host = req.headers.host || 'NOHOST'; req.hostuc = req.host.toUpperCase();
 	req.ip = req.socket.remoteAddress;
 	req.admin = App.AdminIP.includes(req.ip) || false;
-	req.urlz = false; try { req.urlz = new URL(req.url); } catch (ex) { }
+	req.urlz = false; try { req.urlz = new URL(stypelc + '://' + req.host + req.url); } catch (ex) { }
 
 	delete req.headers['X-Forwarded-For']; req.headers['x-forwarded-for'] = req.ip;
 	delete req.headers['X-Forwarded-Host']; req.headers['x-forwarded-host'] = req.host;
@@ -451,6 +451,9 @@ App.ServerHander = function (req, res) {
 		if (t != 'ALL') { if (map.ELSE) { ttype = 'ELSE'; t = 'ELSE'; } else { ttype = 'NOMAP'; t = 'NOMAP'; } }
 	}
 
+
+	if (req.hostuc.startsWith('WWW.')) { ttype = 'WWW-301'; t = new URL(stypelc + '://' + req.host.substr(4) + req.url).href; }
+
 	let tfull = t;
 
 	if (!req.ip) { t = 'ERROR'; }
@@ -473,9 +476,10 @@ App.ServerHander = function (req, res) {
 	if (typeof t == 'string' && !isNaN(t)) { t = Number.parseInt(t); }
 
 	if (typeof (t) == 'number') { res.statusCode = t; res.end(); }
+	else if (t == '404' || t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
 	else if (t == 'BADURL' || t == 'DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(); return; }
 	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); }
-	else if (t == '404' || t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
+	else if (ttype == 'WWW-301') { res.writeHead(301, { Location: t }); res.end(t + "\n"); }
 	else if (t == 'ERROR') { res.statusCode = 500; res.end('ERROR' + "\n"); }
 	else if (t == 'OK') { res.statusCode = 200; res.end('OK' + "\n"); }
 	else if (t == 'TEAPOT') { res.statusCode = 418; res.end('TEAPOT' + "\n"); }
@@ -493,7 +497,7 @@ App.ServerHander = function (req, res) {
 		res.end(loc + "\n");
 	}
 	else if (t && (t.startsWith('@') || t.startsWith('~'))) {
-		if (t.startsWith('~')) { 
+		if (t.startsWith('~')) {
 			delete req.headers['x-forwarded-for'];
 			delete req.headers['x-forwarded-host'];
 			delete req.headers['x-forwarded-proto'];
@@ -522,7 +526,7 @@ App.SNI = function (host, cb) {
 
 	let cert = App.GetCert(host);
 	if (cert) { cb(null, cert.Context); return; }
-	else if (!App.Map[host]) { LOG.DEBUG('SNI.Deny: ' + host + ' Not Listed In Routing Map'); cb(null, Error('SNI:NOMAP')); }
+	else if (!App.Map[host] && !host.startsWith('WWW.')) { LOG.DEBUG('SNI.Deny: ' + host + ' Not Listed In Routing Map'); cb(null, Error('SNI:NOMAP')); }
 	else {
 		if (!App.PublicIP[0] || (App.PublicIP[0] == 'SKIPDNS')) {
 			LOG.DEBUG('SNI: Skipping DNS Verify Because PublicIP = ' + App.PublicIP[0]);
