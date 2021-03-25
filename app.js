@@ -125,11 +125,12 @@ App.Init = async function () {
 	LOG.DEBUG('App.Info: ' + chalk.white(App.Info('App')));
 
 	App.InitData();
+	
+	await App.InitBackend();
 	App.InitMap();
 	App.InitKeys();
 	App.InitProxy();
 	App.InitServer();
-	await App.InitBackend();
 
 	App.InitDone();
 }
