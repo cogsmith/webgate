@@ -233,6 +233,50 @@ App.InitServer = async function () {
 App.InitBackend = function (cb) {
 	LOG.DEBUG('App.InitBackend');
 
+	//
+
+	App.BackendAdmin = { Endpoint: 'http://' + App.IP + ':' + '86', Fastify: fastify({ logger: App.Log, disableRequestLogging: true, maxParamLength: 999, ignoreTrailingSlash: false, }) };
+
+	let ffadmin = App.BackendAdmin.Fastify;
+	ffadmin.register(fastify_compress);
+
+	ffadmin.addHook('onRequest', (req, rep, nxt) => {
+		req.admin = App.AdminIP.includes(req.ip) || false;
+
+		let reqip = req.socket.remoteAddress;
+		App.Requests++; if (!App.Clients[reqip]) { App.Clients[reqip] = 1; } else { App.Clients[reqip]++; }
+
+		nxt();
+	})
+
+	//ffadmin.setNotFoundHandler((req, rep) => { rep.redirect('/404'); });
+	ffadmin.setNotFoundHandler((req, rep) => { rep.code(404).send('Z404'); });
+
+	ffadmin.get('/', (req, rep) => { rep.send(App.Meta.Name); });
+
+	ffadmin.get('/zx/px/loglevel', (req, rep) => {
+		if (!req.admin) { return rep.code(404).send('Z404'); }
+		let level = req.query.level || 'trace';
+		rep.send(App.Log.SetLevel(level));
+	})
+
+	ffadmin.get('/zx/px/stats', (req, rep) => {
+		if (!req.admin) { return rep.code(404).send('Z404'); }
+		// rep.send(App.Stats);
+		util.inspect(mapout, { colors: true, depth: null, breakLength: 1 })
+	})
+
+	ffadmin.get('/zx/px/acme', (req, rep) => {
+		if (!req.admin) { rep.code(404).send('Z404'); }
+		LOG.WARN('PX.Acme'); LOG.DEBUG({ IP: req.socket.remoteAddress, Q: req.query, A: App.AdminIP });
+		let acmedomain = 'localhost'; if (req.query.acme) { acmedomain = req.query.acme; }
+		rep.send('PX:ACME:' + req.hostname + "\n" + App.GetCert(acmedomain));
+	})
+
+	ffadmin.log.infomute = ffadmin.log.info; ffadmin.log.info = ffadmin.log.trace; ffadmin.listen(86, '127.0.0.1', (err, address) => { ffadmin.log.info = ffadmin.log.infomute; if (err) { LOG.ERROR(err); } else { App.BackendAdminStatus = 'UP'; } });
+
+	//
+
 	App.Backend = { Endpoint: 'http://' + App.IP + ':' + App.Port, Fastify: fastify({ logger: App.Log, disableRequestLogging: true, maxParamLength: 999, ignoreTrailingSlash: false, }) };
 
 	let ff = App.Backend.Fastify;
@@ -264,7 +308,8 @@ App.InitBackend = function (cb) {
 
 	ff.get('/zx/px/stats', (req, rep) => {
 		if (!req.admin) { return rep.code(404).send('Z404'); }
-		rep.send(App.Stats);
+		// rep.send(App.Stats);
+		util.inspect(mapout, { colors: true, depth: null, breakLength: 1 })
 	})
 
 	ff.get('/zx/px/acme', (req, rep) => {
@@ -274,7 +319,11 @@ App.InitBackend = function (cb) {
 		rep.send('PX:ACME:' + req.hostname + "\n" + App.GetCert(acmedomain));
 	})
 
-	ff.log.infomute = ff.log.info; ff.log.info = ff.log.trace; ff.listen(89, '127.0.0.1', (err, address) => { ff.log.info = ff.log.infomute; if (err) { LOG.ERROR(err); } else { App.BackendStatus = 'UP'; setTimeout(cb, 9); } });
+	ff.log.infomute = ff.log.info; ff.log.info = ff.log.trace; ff.listen(89, '127.0.0.1', (err, address) => { ff.log.info = ff.log.infomute; if (err) { LOG.ERROR(err); } else { App.BackendStatus = 'UP'; } });
+
+	//
+
+	setTimeout(cb,999);
 }
 
 //
@@ -485,7 +534,7 @@ App.ServerHander = function (req, res) {
 	else if (t == 'TEAPOT') { res.statusCode = 418; res.end('TEAPOT' + "\n"); }
 	else if (t == 'PROXY') { App.Proxy.web(req, res, { target: u.href }); }
 	else if (t == 'BACKEND') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
-	else if (t == 'BACKEND-ADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); } else { res.statusCode = 404; res.end('404' + "\n"); } }
+	else if (t == 'BACKEND-ADMIN') { if (req.admin) { App.Proxy.web(req, res, { target: App.BackendAdmin.Endpoint }); } else { res.statusCode = 404; res.end('404' + "\n"); } }
 	else if (t == 'ACME') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'WEBFILES') { App.Proxy.web(req, res, { target: App.Backend.Endpoint }); }
 	else if (t == 'INFO') { try { res.end(req.method + ' ' + stype.toLowerCase() + '://' + req.host + '' + req.url + "\n" + (new Date().toISOString()) + "\n" + req.headers['user-agent'] + "\n" + req.ip + "\n"); } catch (ex) { LOG.ERROR(ex); } }
