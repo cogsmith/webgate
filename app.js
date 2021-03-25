@@ -268,10 +268,16 @@ App.InitBackend = async function (cb) {
 		rep.send(App.Log.SetLevel(level));
 	})
 
-	ffadmin.get('/zx/px/stats', (req, rep) => {
+	ffadmin.get('/zx/px/map', (req, rep) => {
 		if (!req.admin) { return rep.code(404).send('Z404'); }
 		// rep.send(App.Stats);
 		rep.send( util.inspect(App.Map, { colors: true, depth: null, breakLength: 1 }) );
+	})
+
+	ffadmin.get('/zx/px/stats', (req, rep) => {
+		if (!req.admin) { return rep.code(404).send('Z404'); }
+		// rep.send(App.Stats);
+		rep.type('text/plain').send( util.inspect(App.Stats, { colors: true, depth: null, breakLength: 1 }) );
 	})
 
 	ffadmin.get('/zx/px/acme', (req, rep) => {
