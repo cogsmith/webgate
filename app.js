@@ -567,7 +567,7 @@ App.SNI = function (host, cb) {
 
 	let cert = App.GetCert(host);
 	if (cert) { cb(null, cert.Context); return; }
-	else if (!App.Map[host] || (host.startsWith('WWW.') && !App.Map[host.substr(4)])) { LOG.WARN(host.substr(4)); LOG.DEBUG('SNI.Deny: ' + host + ' Not Listed In Routing Map'); cb(null, Error('SNI:NOMAP')); return; }
+	else if (!App.Map[host] || (host.startsWith('WWW.') && !App.Map[host.substr(4)])) { LOG.WARN(host.substr(4)); console.log(App.Map); console.log(App.Map[host.substr(4)]); LOG.DEBUG('SNI.Deny: ' + host + ' Not Listed In Routing Map'); cb(null, Error('SNI:NOMAP')); return; }
 	else {
 		if (!App.PublicIP[0] || (App.PublicIP[0] == 'SKIPDNS')) {
 			LOG.DEBUG('SNI: Skipping DNS Verify Because PublicIP = ' + App.PublicIP[0]);
