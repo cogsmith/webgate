@@ -264,23 +264,19 @@ App.InitBackend = async function (cb) {
 	ffadmin.get('/', (req, rep) => { rep.send(App.Meta.Name); });
 
 	ffadmin.get('/zx/px/loglevel', (req, rep) => {
-		if (!req.admin) { return rep.code(404).send('Z404'); }
 		let level = req.query.level || 'trace';
 		rep.send(App.Log.SetLevel(level));
 	})
 
 	ffadmin.get('/zx/px/map', (req, rep) => {
-		if (!req.admin) { return rep.code(404).send('Z404'); }
 		rep.type('text/plain').send(util.inspect(App.Map, { colors: false, depth: null, breakLength: 1 }));
 	})
 
 	ffadmin.get('/zx/px/stats', (req, rep) => {
-		if (!req.admin) { return rep.code(404).send('Z404'); }
 		rep.type('text/plain').send(util.inspect(App.Stats, { colors: false, depth: null, breakLength: 1 }));
 	})
 
 	ffadmin.get('/zx/px/acme', (req, rep) => {
-		if (!req.admin) { rep.code(404).send('Z404'); }
 		LOG.WARN('PX.Acme'); LOG.DEBUG({ IP: req.socket.remoteAddress, Q: req.query, A: App.AdminIP });
 		let acmedomain = 'localhost'; if (req.query.acme) { acmedomain = req.query.acme; }
 		rep.send('PX:ACME:' + req.hostname + "\n" + App.GetCert(acmedomain));
