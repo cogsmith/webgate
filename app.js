@@ -250,7 +250,7 @@ App.InitBackend = async function (cb) {
 
 	ffadmin.addHook('onRequest', (req, rep, nxt) => {
 		req.admin = App.AdminIP.includes(req.ip) || false;
-		if (!req.admin) {  return rep.code(404).send(); }
+		if (!req.admin) { return rep.code(404).send(); }
 
 		let reqip = req.socket.remoteAddress;
 		App.Requests++; if (!App.Clients[reqip]) { App.Clients[reqip] = 1; } else { App.Clients[reqip]++; }
