@@ -1,38 +1,39 @@
 {
-	"version": "0.2.0-dev",
-	"namelong": "WEBGATE",
-	"nametag": "WEBGATE",
-	"name": "webgate",
-	"description": "Automagical Proxy Server",
-	"keywords": [],
-	"homepage": "https://cogsmith.com",
-	"license": "http://cogsmith.com/license/public",
-	"repository": "github:cogsmith/webgate",
-	"private": true,
-	"author": {
-		"name": "David Adam Coffey",
-		"email": "dac@cogsmith.com",
-		"url": "http://david-adam-coffey.com"
-	},
-	"main": "app.js",
-	"scripts": {
-		"dev": "nodemon app.js",
-		"start": "node app.js"
-	},
-	"dependencies": {
-		"acme-client": "^4.1.3",
-		"axios": "^0.21.1",
-		"chalk": "^4.1.0",
-		"fastify": "^3.12.0",
-		"fastify-compress": "^3.4.1",
-		"fastify-http-proxy": "^5.0.0",
-		"fastify-static": "^4.0.1",
-		"http-proxy": "^1.18.1",
-		"js-yaml": "^4.0.0",
-		"lodash": "^4.17.21",
-		"nconf": "^0.11.2",
-		"node-forge": "^0.10.0",
-		"pino-pretty": "^4.7.1",
-		"yargs": "^16.2.0"
-	}
+  "version": "0.2.0",
+  "namelong": "WEBGATE",
+  "nametag": "WEBGATE",
+  "name": "webgate",
+  "description": "Automagical Proxy Server",
+  "keywords": [],
+  "homepage": "https://cogsmith.com",
+  "license": "http://cogsmith.com/license/public",
+  "repository": "github:cogsmith/webgate",
+  "private": true,
+  "author": {
+    "name": "David Adam Coffey",
+    "email": "dac@cogsmith.com",
+    "url": "http://david-adam-coffey.com"
+  },
+  "main": "app.js",
+  "scripts": {
+    "dev": "nodemon app.js",
+    "start": "node app.js"
+  },
+  "dependencies": {
+    "acme-client": "^4.1.3",
+    "axios": "^0.21.1",
+    "chalk": "^4.1.0",
+    "fastify": "^3.12.0",
+    "fastify-compress": "^3.4.1",
+    "fastify-http-proxy": "^5.0.0",
+    "fastify-static": "^4.0.1",
+    "http-proxy": "^1.18.1",
+    "js-yaml": "^4.0.0",
+    "lodash": "^4.17.21",
+    "nconf": "^0.11.2",
+    "node-forge": "^0.10.0",
+    "pino-pretty": "^4.7.1",
+    "yargs": "^16.2.0"
+  },
+  "versiontaglast": "0.2.0"
 }
