@@ -458,10 +458,11 @@ App.ServerHander = function (req, res) {
 
 	let map = App.Map; // map = {};
 
-	let u = new URL(url); let uhost = u.host.toUpperCase();
 	let t = false;
-
 	let ttype = null;
+
+	let u = false; try { u = new URL(url); ttype = 'INVALID'; t = url; } catch (ex) { LOG.WARN('ServerHandler: URL_INVALID = ' + url); LOG.WARN(ex); }
+	let uhost = u.host.toUpperCase();
 
 	if (map.ALL) { ttype = 'ALL'; t = 'ALL'; }
 
@@ -514,7 +515,7 @@ App.ServerHander = function (req, res) {
 	if (typeof t == 'string' && !isNaN(t)) { t = Number.parseInt(t); }
 
 	if (typeof (t) == 'number') { res.statusCode = t; res.end(); }
-	else if (t == 'HANGUP') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); return; }
+	else if (t == 'HANGUP' || t == 'INVALID') { res.statusCode = 502; res.shouldKeepAlive = false; res.socket.end(); res.end(); return; }
 	else if (t == 'BADURL' || t == 'DENY' || t.startsWith('DENY:')) { res.statusCode = 404; res.end(); return; }
 	else if (t == '404' || t == 'NOMAP' || t == 'NOTFOUND') { res.statusCode = 404; res.end(t + "\n"); }
 	else if (ttype == 'WWW-301') { res.writeHead(301, { Location: t }); res.end(t + "\n"); }
