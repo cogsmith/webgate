@@ -461,7 +461,7 @@ App.ServerHander = function (req, res) {
 	let t = false;
 	let ttype = null;
 
-	let u = false; try { u = new URL(url); ttype = 'INVALID'; t = url; } catch (ex) { LOG.WARN('ServerHandler: URL_INVALID = ' + url); LOG.WARN(ex); }
+	let u = false; try { u = new URL(url); } catch (ex) { ttype = 'INVALID'; t = url; LOG.WARN('ServerHandler: URL_INVALID = ' + url); LOG.WARN(ex); }
 	let uhost = u.host.toUpperCase();
 
 	if (map.ALL) { ttype = 'ALL'; t = 'ALL'; }
