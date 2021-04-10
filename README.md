@@ -1,5 +1,5 @@
 # 📡 WEBGATE: Automagical Proxy Server 📡
-### API Gateway, Proxy Server, Load Balancer, Virtual Domains, ACME HTTPS Certs
+### API Gateway, WAF, Proxy Server, Load Balancer, Virtual Domains, ACME HTTPS Certs
 
 ---
 
