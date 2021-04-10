@@ -3,7 +3,7 @@
 
 ---
 
-:octocat: https://github.com/cogsmith/webgate
+:octocat: <code><a href='https://github.com/cogsmith/webgate'>https://github.com/cogsmith/webgate</a></code>
 
 ---
 
