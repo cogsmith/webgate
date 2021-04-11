@@ -1,5 +1,15 @@
 <code>
 
+# [0.3.0 @ 2021-04-10](https://github.com/cogsmith/webgate/releases/tag/0.3.0)
+
+## DIFF
+- [1 COMMITS SINCE LAST TAG = 0.2.10](https://github.com/cogsmith/webgate/compare/0.2.10...0.3.0)
+
+</code>
+
+---
+<code>
+
 # [0.2.10 @ 2021-04-10](https://github.com/cogsmith/webgate/releases/tag/0.2.10)
 
 ## DIFF
