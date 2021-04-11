@@ -1,20 +1,19 @@
-<h1>📡 WEBGATE: Automagical Proxy Server 📡</h1>
-<h3>API Gateway, WAF, Proxy Server, Load Balancer, Virtual Domains, ACME HTTPS Certs</h3>
+# 📡 WEBGATE: Automagical Proxy Server 📡
+### API Gateway, WAF, Proxy Server, Load Balancer, Virtual Domains, ACME HTTPS Certs
 
 ---
 
 <a href='https://github.com/cogsmith/webgate'><img src='https://github-readme-stats.vercel.app/api/pin/?username=cogsmith&repo=webgate' align='right'></a>
 
-<h3><code><a href='https://github.com/cogsmith/webgate'><img src='https://github.githubassets.com/images/icons/emoji/octocat.png' width='26'> [GITHUB REPO]</a></code></h3>
+### <code><a href='https://github.com/cogsmith/webgate'><img src='https://github.githubassets.com/images/icons/emoji/octocat.png' width='26'> [GITHUB REPO]</a></code>
 
-<h3><code><a href='https://hub.docker.com/r/cogsmith/webgate'>🐳 [DOCKER IMAGE]</a></code></h3>
+### <code><a href='https://hub.docker.com/r/cogsmith/webgate'>🐳 [DOCKER IMAGE]</a></code>
 
-<h3><code><a href='https://github.com/cogsmith/webgate/blob/main/app.js'>🧾 [VIEW APP SOURCE CODE]</a></code></h3>
+### <code><a href='https://github.com/cogsmith/webgate/blob/main/app.js'>🧾 [VIEW APP SOURCE CODE]</a></code>
 
-<h3><code><a href='https://github.com/cogsmith/webgate/projects/2'>📅 [PROJECT TRACKER BOARD]</a></code></h3>
+### <code><a href='https://github.com/cogsmith/webgate/projects/2'>📅 [PROJECT TRACKER BOARD]</a></code>
 
 ---
-
 
 <img src='https://shields.io/github/package-json/v/cogsmith/webgate?label=codebase' align='left'>
 <img src='https://shields.io/github/last-commit/cogsmith/webgate' align='left'>
