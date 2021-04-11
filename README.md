@@ -5,13 +5,13 @@
 
 <a href='https://github.com/cogsmith/webgate'><img src='https://github-readme-stats.vercel.app/api/pin/?username=cogsmith&repo=webgate' align='right'></a>
 
-### <code><a href='https://github.com/cogsmith/webgate'><img src='https://github.githubassets.com/images/icons/emoji/octocat.png' width='26'> [GITHUB REPO]</a></code>
+#### <code><a href='https://github.com/cogsmith/webgate'><img src='https://github.githubassets.com/images/icons/emoji/octocat.png' width='26'> [GITHUB REPO]</a></code>
 
-### <code><a href='https://hub.docker.com/r/cogsmith/webgate'>🐳 [DOCKER IMAGE]</a></code>
+#### <code><a href='https://hub.docker.com/r/cogsmith/webgate'>🐳 [DOCKER IMAGE]</a></code>
 
-### <code><a href='https://github.com/cogsmith/webgate/blob/main/app.js'>🧾 [VIEW APP SOURCE CODE]</a></code>
+#### <code><a href='https://github.com/cogsmith/webgate/blob/main/app.js'>🧾 [VIEW APP SOURCE CODE]</a></code>
 
-### <code><a href='https://github.com/cogsmith/webgate/projects/2'>📅 [PROJECT TRACKER BOARD]</a></code>
+#### <code><a href='https://github.com/cogsmith/webgate/projects/2'>📅 [PROJECT TRACKER BOARD]</a></code>
 
 ---
 
