@@ -1,5 +1,18 @@
 <code>
 
+# [0.2.10 @ 2021-04-10](https://github.com/cogsmith/webgate/releases/tag/0.2.10)
+
+## DIFF
+- [3 COMMITS SINCE LAST TAG = 0.2.9](https://github.com/cogsmith/webgate/compare/0.2.9...0.2.10)
+
+## COMMIT
+- Merge branch 'main' of https://github.com/cogsmith/webgate
+
+</code>
+
+---
+<code>
+
 # [0.2.9 @ 2021-04-10](https://github.com/cogsmith/webgate/releases/tag/0.2.9)
 
 ## DIFF
