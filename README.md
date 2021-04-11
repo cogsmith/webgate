@@ -15,21 +15,20 @@
 
 ---
 
-
-[![](https://shields.io/github/license/cogsmith/webgate?color=lightgray)](http://github.com)
-[![](https://shields.io/github/languages/code-size/cogsmith/webgate)](http://github.com)
-[![](https://shields.io/github/repo-size/cogsmith/webgate)](http://github.com)
-[![](https://shields.io/docker/image-size/cogsmith/webgate?sort=date&label=docker+size)](http://github.com)
-[![](https://shields.io/github/issues-raw/cogsmith/webgate)](http://github.com)
+[![](https://shields.io/github/package-json/v/cogsmith/webgate?label=codebase)](http://github.com)
+[![](https://shields.io/github/last-commit/cogsmith/webgate)](http://github.com)
+[![](https://github.com/cogsmith/webgate/actions/workflows/DEVKING_CHECK.yml/badge.svg)](http://github.com)
 
 [![](https://shields.io/github/v/release/cogsmith/webgate?label=latest+release)](http://github.com)
 [![](https://shields.io/github/release-date/cogsmith/webgate?color=blue)](http://github.com)
 [![](https://shields.io/github/commits-since/cogsmith/webgate/latest)](http://github.com)
 <!-- [![](https://shields.io/github/commit-activity/m/cogsmith/webgate)](http://github.com) -->
 
-[![](https://shields.io/github/package-json/v/cogsmith/webgate?label=codebase)](http://github.com)
-[![](https://shields.io/github/last-commit/cogsmith/webgate)](http://github.com)
-[![](https://github.com/cogsmith/webgate/actions/workflows/DEVKING_CHECK.yml/badge.svg)](http://github.com)
+[![](https://shields.io/github/license/cogsmith/webgate?color=lightgray)](http://github.com)
+[![](https://shields.io/github/languages/code-size/cogsmith/webgate)](http://github.com)
+[![](https://shields.io/github/repo-size/cogsmith/webgate)](http://github.com)
+[![](https://shields.io/docker/image-size/cogsmith/webgate?sort=date&label=docker+size)](http://github.com)
+[![](https://shields.io/github/issues-raw/cogsmith/webgate)](http://github.com)
 
 ---
 
