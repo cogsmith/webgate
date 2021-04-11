@@ -23,7 +23,7 @@
 <img src='https://shields.io/github/v/release/cogsmith/webgate?label=latest+release' align='left'>
 <img src='https://shields.io/github/release-date/cogsmith/webgate?color=blue' align='left'>
 <img src='https://shields.io/github/commits-since/cogsmith/webgate/latest' align='left'>
-<img src='https://shields.io/github/commit-activity/m/cogsmith/webgate'>
+<!-- <img src='https://shields.io/github/commit-activity/m/cogsmith/webgate'> -->
 
 <img src='https://shields.io/github/license/cogsmith/webgate?color=lightgray' align='left'>
 <img src='https://shields.io/github/languages/code-size/cogsmith/webgate' align='left'>
