@@ -1,5 +1,5 @@
 {
-  "version": "0.2.9-dev",
+  "version": "0.2.10-dev",
   "namelong": "WEBGATE",
   "nametag": "WEBGATE",
   "name": "webgate",
@@ -35,5 +35,5 @@
     "pino-pretty": "^4.7.1",
     "yargs": "^16.2.0"
   },
-  "versiontaglast": "0.2.8"
+  "versiontaglast": "0.2.9"
 }
