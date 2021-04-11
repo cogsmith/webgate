@@ -18,18 +18,18 @@
 
 <img src='https://shields.io/github/package-json/v/cogsmith/webgate?label=codebase' align='left'>
 <img src='https://shields.io/github/last-commit/cogsmith/webgate' align='left'>
-<img src='https://github.com/cogsmith/webgate/actions/workflows/DEVKING_CHECK.yml/badge.svg' zalign=''>
+<img src='https://github.com/cogsmith/webgate/actions/workflows/DEVKING_CHECK.yml/badge.svg'>
 
 <img src='https://shields.io/github/v/release/cogsmith/webgate?label=latest+release' align='left'>
 <img src='https://shields.io/github/release-date/cogsmith/webgate?color=blue' align='left'>
 <img src='https://shields.io/github/commits-since/cogsmith/webgate/latest' align='left'>
-<img src='https://shields.io/github/commit-activity/w/cogsmith/webgate' zalign=''>
+<img src='https://shields.io/github/commit-activity/m/cogsmith/webgate'>
 
 <img src='https://shields.io/github/license/cogsmith/webgate?color=lightgray' align='left'>
 <img src='https://shields.io/github/languages/code-size/cogsmith/webgate' align='left'>
 <img src='https://shields.io/github/repo-size/cogsmith/webgate' align='left'>
 <img src='https://shields.io/docker/image-size/cogsmith/webgate?sort=date&label=docker+size' align='left'>
-<img src='https://shields.io/github/issues-raw/cogsmith/webgate' zalign=''>
+<img src='https://shields.io/github/issues-raw/cogsmith/webgate'>
 
 ---
 
