@@ -121,9 +121,14 @@ App.GetDateString = function () { return new Date().toISOString().replace(/-/g, 
 
 App.CronFX = function () {
 	LOG.DEBUG('App.CronFX');
-	let db = levelup(leveldown('data/DB_' + App.GetDateString()));
-	db.put('DB', { Stats: App.Stats });
-	db.close();
+	try {
+		let dbpath = 'data/DB_' + App.GetDateString();
+		// fs.mkdirSync(App.DataPath + '/WWW', { recursive: true });
+		fs.mkdirSync(dbpath, { recursive: true });
+		let db = levelup(leveldown(dbpath);
+		db.put('DB', { Stats: App.Stats });
+		db.close();
+	} catch (ex) { LOG.ERROR(ex); }
 }
 
 App.CronMinFX = function () {
