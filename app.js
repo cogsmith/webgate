@@ -122,9 +122,7 @@ App.GetDateString = function () { return new Date().toISOString().replace(/-/g, 
 App.CronFX = function () {
 	LOG.DEBUG('App.CronFX');
 	try {
-		let dbpath = 'data/DB_' + App.GetDateString();
-		LOG.DEBUG('DBPATH: ' + dbpath);
-		// fs.mkdirSync(App.DataPath + '/WWW', { recursive: true });
+		let dbpath = App.DataPath + '/WEBGATE/DATA/DB' + App.GetDateString();
 		fs.mkdirSync(dbpath, { recursive: true });
 		let db = levelup(leveldown(dbpath));
 		db.put('DB', { Stats: App.Stats });
