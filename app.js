@@ -123,6 +123,7 @@ App.CronFX = function () {
 	LOG.DEBUG('App.CronFX');
 	try {
 		let dbpath = 'data/DB_' + App.GetDateString();
+		LOG.DEBUG('DBPATH: ' + dbpath);
 		// fs.mkdirSync(App.DataPath + '/WWW', { recursive: true });
 		fs.mkdirSync(dbpath, { recursive: true });
 		let db = levelup(leveldown(dbpath);
