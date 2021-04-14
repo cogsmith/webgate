@@ -360,7 +360,7 @@ App.WatchMaps = function () {
 	if (App.Args.mapfile) {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
-			let f = App.DataPath + '/' + z;
+			let f = z; if (!z.includes('/')) { f = App.DataPath + '/MAPS/' + z; }
 			if (App.MapWatchers[f]) { App.MapWatchers[f].close(); }
 			try { App.MapWatchers = fs.watch(f, (etype, file) => { if (etype == 'change') { if (!App.LoadMapsTimeout) { App.LoadMapsTimeout = setTimeout(App.LoadMaps, 999); } } }); } catch (ex) { LOG.TRACE('App.WatchMap: ' + f + ' = FAIL'); }
 		}
@@ -379,7 +379,7 @@ App.LoadMaps = function () {
 	if (App.Args.mapfile) {
 		for (let i = 0; i < App.Args.mapfile.length; i++) {
 			let z = App.Args.mapfile[i]; if (!z) { continue; }
-			let f = App.DataPath + '/' + z;
+			let f = z; if (!z.includes('/')) { f = App.DataPath + '/MAPS/' + z; }
 			LOG.DEBUG('App.LoadMapFile: ' + f);
 			let txt = ''; try { txt = fs.readFileSync(f).toString().trim(); } catch (ex) { LOG.ERROR('App.LoadMapFile: ' + f + ' = FAIL'); }
 			maptext += txt + "\n";
