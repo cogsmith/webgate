@@ -121,7 +121,7 @@ App.GetDateString = function () { return new Date().toISOString().replace(/-/g, 
 
 App.CronFXBUSY = false;
 App.CronFX = function () {
-	if (App.CronFXBUSY) { return setTimeout(App.CronFX, 99); }
+	if (App.CronFXBUSY) { return setTimeout(App.CronFX, 9); }
 	App.CronFXBUSY = true;
 	LOG.DEBUG('App.CronFX');
 	// Error [OpenError]: IO error: lock /webgate/WEBGATE/DATA/DB20210414/LOCK: already held by process
@@ -129,7 +129,7 @@ App.CronFX = function () {
 		let dbpath = App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString();
 		fs.mkdirSync(dbpath, { recursive: true });
 		let db = levelup(leveldown(dbpath));
-		db.put('DB', { Stats: App.Stats });
+		db.put('DB', { Stats: App.Stats }, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.Put'); } });
 		db.close();
 	} catch (ex) { LOG.ERROR(ex); }
 	App.CronFXBUSY = false;
@@ -155,7 +155,7 @@ App.Init = async function () {
 	LOG.DEBUG('Node.Args: ' + chalk.white(App.Info('Node.Args')));
 	LOG.DEBUG('App.Info: ' + chalk.white(App.Info('App')));
 
-	App.CronJob = cron.scheduleJob('*/10 * * * *', App.CronFX);
+	App.CronJob = cron.scheduleJob('*/2 * * * *', App.CronFX);
 	App.CronJobMin = cron.scheduleJob('*/1 * * * *', App.CronMinFX);
 
 	App.InitData();
