@@ -133,11 +133,9 @@ App.CronFX = function () {
 		let ldb = leveldown(dbpath); let db = levelup(ldb);
 		for (let i = 0; i < 9999; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
 		let DB = { Stats: App.Stats, Random: App.StatsRandom };
-		db.put('DB', DB, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.Put'); } });
-		db.close();
+		db.put('DB', DB, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.Put'); } db.close(function () { App.CronFXBUSY = false; }) });
 	} catch (ex) { LOG.ERROR(ex); }
 	LOG.DEBUG('App.CronFX:DONE');
-	App.CronFXBUSY = false;
 }
 
 App.CronMinFX = function () {
