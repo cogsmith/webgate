@@ -1,5 +1,19 @@
 <code>
 
+# [0.3.4](https://github.com/cogsmith/webgate/compare/0.3.4...main) @ [2021-04-14](https://github.com/cogsmith/webgate/releases/tag/0.3.4) 
+
+## DIFF
+- [3 COMMITS SINCE LAST TAG = 0.3.3](https://github.com/cogsmith/webgate/compare/0.3.3...0.3.4)
+
+## COMMIT
+- npm install node-schedule
+- npm install levelup leveldown
+
+</code>
+
+---
+<code>
+
 # [0.3.3](https://github.com/cogsmith/webgate/compare/0.3.3...main) @ [2021-04-10](https://github.com/cogsmith/webgate/releases/tag/0.3.3) 
 
 ## DIFF
