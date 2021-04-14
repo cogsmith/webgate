@@ -126,7 +126,7 @@ App.CronFX = function () {
 		LOG.DEBUG('DBPATH: ' + dbpath);
 		// fs.mkdirSync(App.DataPath + '/WWW', { recursive: true });
 		fs.mkdirSync(dbpath, { recursive: true });
-		let db = levelup(leveldown(dbpath);
+		let db = levelup(leveldown(dbpath));
 		db.put('DB', { Stats: App.Stats });
 		db.close();
 	} catch (ex) { LOG.ERROR(ex); }
