@@ -34,6 +34,7 @@
     "lodash": "^4.17.21",
     "nconf": "^0.11.2",
     "node-forge": "^0.10.0",
+    "node-schedule": "^2.0.0",
     "pino-pretty": "^4.7.1",
     "yargs": "^16.2.0"
   },
