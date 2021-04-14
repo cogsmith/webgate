@@ -121,7 +121,7 @@ App.GetDateString = function () { return new Date().toISOString().replace(/-/g, 
 
 App.CronFXBUSY = false;
 App.CronFX = function () {
-	if (App.CronFXBUSY) { setTimeout(App.CronFX, 99); }
+	if (App.CronFXBUSY) { return setTimeout(App.CronFX, 99); }
 	App.CronFXBUSY = true;
 	LOG.DEBUG('App.CronFX');
 	// Error [OpenError]: IO error: lock /webgate/WEBGATE/DATA/DB20210414/LOCK: already held by process
