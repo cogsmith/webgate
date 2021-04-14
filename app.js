@@ -119,6 +119,8 @@ App.GetSlugHost = function (slug) { if (!slug) { return slug; } let host = slug.
 
 App.GetDateString = function () { return new Date().toISOString().replace(/-/g, '').substr(0, 8); }
 
+App.StatsRandom = {};
+
 App.CronFXBUSY = false;
 App.CronFX = function () {
 	if (App.CronFXBUSY) { return setTimeout(App.CronFX, 9); }
@@ -129,7 +131,7 @@ App.CronFX = function () {
 		let dbpath = App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString();
 		fs.mkdirSync(dbpath, { recursive: true });
 		let db = levelup(leveldown(dbpath));
-		let r = {}; for (let i = 0; i < 99999999; i++) { r[i] = Math.random(); }
+		for (let i = 0; i < 9999; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
 		db.put('DB', { Stats: App.Stats, Random: r }, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.Put'); } });
 		db.close();
 	} catch (ex) { LOG.ERROR(ex); }
