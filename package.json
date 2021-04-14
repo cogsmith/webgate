@@ -29,6 +29,8 @@
     "fastify-static": "^4.0.1",
     "http-proxy": "^1.18.1",
     "js-yaml": "^4.0.0",
+    "leveldown": "^6.0.0",
+    "levelup": "^4.4.0",
     "lodash": "^4.17.21",
     "nconf": "^0.11.2",
     "node-forge": "^0.10.0",
