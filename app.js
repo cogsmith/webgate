@@ -131,8 +131,9 @@ App.CronFX = function () {
 		let dbpath = App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString();
 		fs.mkdirSync(dbpath, { recursive: true });
 		let db = levelup(leveldown(dbpath));
-		for (let i = 0; i < 999999; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
-		db.put('DB', { Stats: App.Stats, Random: r }, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.Put'); } });
+		for (let i = 0; i < 9999; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
+		let DB = { Stats: App.Stats, Random: App.StatsRandom };
+		db.put('DB', DB, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.Put'); } });
 		db.close();
 	} catch (ex) { LOG.ERROR(ex); }
 	App.CronFXBUSY = false;
