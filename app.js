@@ -136,6 +136,7 @@ App.CronFX = function () {
 		db.put('DB', DB, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.Put'); } });
 		db.close();
 	} catch (ex) { LOG.ERROR(ex); }
+	LOG.DEBUG('App.CronFX:DONE');
 	App.CronFXBUSY = false;
 }
 
