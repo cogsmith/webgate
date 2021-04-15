@@ -201,7 +201,7 @@ App.InitData = function () {
 	App.Server = {};
 
 	App.Requests = 0;
-	App.Stats = { Max: { Sockets: { HTTP: 0, HTTPS: 0 } }, Hits: { Host: {}, IP: {}, Total: { HTTP: 0, HTTPS: 0 } } };
+	App.Stats = { Max: { Sockets: { HTTP: 0, HTTPS: 0 } }, Hits: { Host: {}, IP: {}, Total: { ALL: 0, HTTP: 0, HTTPS: 0 } } };
 
 	App.MapWatchers = {};
 
