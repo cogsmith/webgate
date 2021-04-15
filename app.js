@@ -127,7 +127,7 @@ App.CronFX = function () {
 	App.CronFXBUSY = true;
 	LOG.DEBUG('App.CronFX');
 	// Error [OpenError]: IO error: lock /webgate/WEBGATE/DATA/DB/DB20210414/LOCK: already held by process
-	let DB = { Stats: App.Stats };
+	let DB = { Stats: App.Stats, RequestLog: App.RequestLog };
 	try {
 		//for (let i = 0; i < 1000; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
 		let dbpath = App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString();
@@ -136,7 +136,7 @@ App.CronFX = function () {
 		db.put('DB', JSON.stringify(DB), function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.PUT'); } db.close(function () { App.CronFXBUSY = false; }) });
 	} catch (ex) { LOG.ERROR(ex); }
 
-	fs.writeFileSync(App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString() + '.JSON', JSON.stringify(DB));
+	fs.writeFileSync(App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString() + '.JSON', JSON.stringify(DB) + "\n");
 
 	LOG.DEBUG('App.CronFX:DONE');
 }
@@ -208,6 +208,8 @@ App.InitData = function () {
 	App.CertDB = function () { };
 	App.CertDB.Data = {};
 	App.CertReqs = {};
+
+	App.RequestLog = [];
 
 	App.ACME = { Endpoints: { 'letsencrypt-staging': acme.directory.letsencrypt.staging, 'letsencrypt-production': acme.directory.letsencrypt.production, 'zerossl': 'https://acme.zerossl.com/v2/DV90' } };
 	App.ACME.Endpoint = App.ACME.Endpoints[App.Args.acme] ? App.ACME.Endpoints[App.Args.acme] : App.Args.acme;
@@ -554,6 +556,23 @@ App.ServerHander = function (req, res) {
 	let logmsg = (chalk[req.admin ? 'yellow' : 'white'](req.ip) + ' ' + (req.forproxy ? 'PROXY ' : '') + req.method + ' ' + u.href + ' => ' + logto + ((LOG.level == 'trace') ? "\n" : '')).replaceAll(' => ', chalk.white(' => ')).replaceAll('DENY:', chalk.red('DENY:'));
 	let loglinelevel = 'INFO'; if (t == 'BADURL') { loglinelevel = 'TRACE'; };
 	LOG[loglinelevel](logmsg);
+
+	let logrow = {
+		DT: new Date(),
+		ID: req.id,
+		Admin: req.admin,
+		IP: req.ip,
+		URL: req.url,
+		Host: req.host,
+		Method: req.method,
+		Target: t,
+		TargetType: ttype,
+		UserAgent: req.headers['user-agent']
+	};
+
+	console.log(logrow);
+
+	App.RequestLog.push(logrow);
 
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
