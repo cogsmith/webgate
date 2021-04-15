@@ -488,6 +488,7 @@ App.ServerHander = function (req, res) {
 	delete req.headers['X-Forwarded-Host']; req.headers['x-forwarded-host'] = req.host;
 	delete req.headers['X-Forwarded-Proto']; req.headers['x-forwarded-proto'] = stypelc;
 
+	App.Stats.Hits.Total.ALL++;
 	App.Stats.Hits.Total[stype]++;
 	if (!App.Stats.Hits.Host[req.hostuc]) { App.Stats.Hits.Host[req.hostuc] = 1 } else { App.Stats.Hits.Host[req.hostuc]++ }
 	if (!App.Stats.Hits.IP[req.ip]) { App.Stats.Hits.IP[req.ip] = 1 } else { App.Stats.Hits.IP[req.ip]++ }
@@ -559,8 +560,9 @@ App.ServerHander = function (req, res) {
 
 	let logrow = {
 		DT: new Date(),
-		ID: req.id,
+		Num: App.Stats.Hits.Total.ALL,
 		Admin: req.admin,
+		Via: stype,
 		IP: req.ip,
 		URL: req.url,
 		Host: req.host,
