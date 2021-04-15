@@ -132,9 +132,9 @@ App.CronFX = function () {
 		let dbpath = App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString();
 		fs.mkdirSync(dbpath, { recursive: true });
 		let ldb = leveldown(dbpath); let db = levelup(ldb);
-		for (let i = 0; i < 9999; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
+		for (let i = 0; i < 100; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
 		console.log(DB.RandomCount);
-		db.put('DB', DB, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.PUT'); } db.close(function () { App.CronFXBUSY = false; }) });
+		db.put('DB', JSON.stringify(DB), function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.PUT'); } db.close(function () { App.CronFXBUSY = false; }) });
 	} catch (ex) { LOG.ERROR(ex); }
 
 	fs.writeFileSync(App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString() + '.JSON', JSON.stringify(DB));
