@@ -119,7 +119,7 @@ App.GetSlugHost = function (slug) { if (!slug) { return slug; } let host = slug.
 
 App.GetDateString = function () { return new Date().toISOString().replace(/-/g, '').substr(0, 8); }
 
-App.StatsRandom = {};
+//App.StatsRandom = {};
 
 App.CronFXBUSY = false;
 App.CronFX = function () {
@@ -127,13 +127,12 @@ App.CronFX = function () {
 	App.CronFXBUSY = true;
 	LOG.DEBUG('App.CronFX');
 	// Error [OpenError]: IO error: lock /webgate/WEBGATE/DATA/DB/DB20210414/LOCK: already held by process
-	let DB = { Stats: App.Stats, RandomCount: Object.keys(App.StatsRandom).length, Random: App.StatsRandom };
+	let DB = { Stats: App.Stats };
 	try {
+		//for (let i = 0; i < 1000; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
 		let dbpath = App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString();
 		fs.mkdirSync(dbpath, { recursive: true });
-		let ldb = leveldown(dbpath); let db = levelup(ldb);
-		for (let i = 0; i < 100; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
-		console.log(DB.RandomCount);
+		let db = levelup(leveldown(dbpath));
 		db.put('DB', JSON.stringify(DB), function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.PUT'); } db.close(function () { App.CronFXBUSY = false; }) });
 	} catch (ex) { LOG.ERROR(ex); }
 
