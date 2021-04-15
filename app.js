@@ -126,14 +126,15 @@ App.CronFX = function () {
 	if (App.CronFXBUSY) { return setTimeout(App.CronFX, 9); }
 	App.CronFXBUSY = true;
 	LOG.DEBUG('App.CronFX');
-	// Error [OpenError]: IO error: lock /webgate/WEBGATE/DATA/DB20210414/LOCK: already held by process
+	// Error [OpenError]: IO error: lock /webgate/WEBGATE/DATA/DB/DB20210414/LOCK: already held by process
 	try {
 		let dbpath = App.DataPath + '/WEBGATE/DATA/DB/DB' + App.GetDateString();
 		fs.mkdirSync(dbpath, { recursive: true });
 		let ldb = leveldown(dbpath); let db = levelup(ldb);
 		for (let i = 0; i < 9999; i++) { let r = Math.random(); App.StatsRandom[r] = i; }
-		let DB = { Stats: App.Stats, Random: App.StatsRandom };
-		db.put('DB', DB, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.Put'); } db.close(function () { App.CronFXBUSY = false; }) });
+		let DB = { Stats: App.Stats, RandomCount: Object.keys(App.StatsRandom).length, Random: App.StatsRandom };
+		console.log(DB.RandomCount);
+		db.put('DB', DB, function (err) { if (err) { LOG.ERROR(err); } else { LOG.TRACE('DB.PUT'); } db.close(function () { App.CronFXBUSY = false; }) });
 	} catch (ex) { LOG.ERROR(ex); }
 	LOG.DEBUG('App.CronFX:DONE');
 }
