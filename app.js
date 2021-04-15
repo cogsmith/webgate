@@ -569,9 +569,9 @@ App.ServerHander = function (req, res) {
 		Method: req.method,
 		Target: t,
 		TargetType: ttype,
-		TargetFull: tfull,
 		UserAgent: req.headers['user-agent']
 	};
+	if (t != tfull) { logrow.TargetFull = tfull; }
 
 	console.log(logrow);
 
