@@ -620,7 +620,7 @@ App.ServerHander = function (req, res) {
 		if (!t.includes(':')) { t = 'http://' + t };
 		let tp = '/'; tp = new URL(t).pathname;
 		req.url = tp.pathname || '/';
-		try { App.Proxy.web(req, res, { target: t, followRedirects: true, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
+		try { App.Proxy.web(req, res, { target: t, followRedirects: false, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
 	}
 }
 
