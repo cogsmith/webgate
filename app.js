@@ -603,6 +603,13 @@ App.ServerHander = function (req, res) {
 		res.writeHead(301, { Location: loc });
 		res.end(loc + "\n");
 	}
+	else if (t && t.startsWith('^')) {
+		t = t.substring(1);
+		if (!t.includes(':')) { t = 'http://' + t };
+		let tp = '/'; tp = new URL(t).pathname;
+		req.url = (req.url + (tp.pathname || '')) || '/';
+		try { App.Proxy.web(req, res, { target: t, followRedirects: false, changeOrigin: true }); } catch (ex) { LOG.ERROR(ex); }
+	}
 	else if (t && (t.startsWith('@') || t.startsWith('~'))) {
 		if (t.startsWith('~')) {
 			delete req.headers['x-forwarded-for'];
