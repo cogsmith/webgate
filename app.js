@@ -600,7 +600,7 @@ App.ServerHander = function (req, res) {
 		t = t.substring(1);
 		if (!t.includes(':')) { t = 'http://' + t };
 		let loc = new URL(t).href;
-		res.writeHead(301, { Location: loc });
+		res.writeHead(302, { Location: loc });
 		res.end(loc + "\n");
 	}
 	else if (t && t.startsWith('|')) {
