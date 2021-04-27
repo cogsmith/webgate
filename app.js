@@ -37,77 +37,44 @@ const forge = require('node-forge'); forge.options.usePureJavaScript = true;
 
 //
 
-const AppPackage = require('./package.json');
-const AppMeta = _.merge(AppPackage, { Version: AppPackage.version || process.env.npm_package_version || '0.0.0', Name: AppPackage.namelong || AppPackage.name || 'App', NameTag: AppPackage.nametag || AppPackage.name.toUpperCase(), Info: AppPackage.description || '' });
-AppMeta.Full = AppMeta.Name + ': ' + AppMeta.Info + ' [' + AppMeta.Version + ']';
+const XT = require('/DEV/CODE/xtdev/node_modules/@cogsmith/xt');
+const LOG = XT.Log;
+const App = XT.App;
 
 //
 
-const AppArgy = yargs(process.argv).wrap(75).help(false).version(false)
-	.usage("\n" + AppMeta.Full + "\n\n" + 'USAGE: node $0 [options]')
-	.group('loglevel', 'Log').describe('loglevel', 'Log Level').default('loglevel', 'info')
-	.group('logpretty', 'Log').describe('logpretty', 'Log Pretty').boolean('logpretty').default('logpretty', true)
-	.describe('ip', 'Bind IP').default('ip', process.env.host || '0.0.0.0')
-	.describe('port', 'Backend Bind Port').default('port', process.env.PORT || 89)
-	.describe('port80', 'HTTP Bind Port').default('port80', 80)
-	.describe('port443', 'HTTPS Bind Port').default('port443', 443)
-	.describe('acme', 'ACME Endpoint').default('acme', 'letsencrypt-production')
-	.describe('private', 'Private IP').default('private', null)
-	.describe('public', 'Public IP').default('public', null).array('public')
-	.describe('admin', 'Admin IP').default('admin', null).array('admin')
-	.describe('datapath', 'Data Path').default('datapath', '/webgate')
-	.group('to', 'Proxy Map').describe('to', 'Map To').default('to', 'INFO').array('to')
-	.group('from', 'Proxy Map').describe('from', 'Map From').default('from', null).array('from')
-	.group('map', 'Proxy Map').describe('map', 'Map Text').array('map').default('map', null)
-	.group('mapfile', 'Proxy Map').describe('mapfile', 'Map File').array('mapfile').default('mapfile', null)
-	.demandOption([])
+App.InitArgs = function () {
+	App.Argy = yargs(process.argv).wrap(75).help(false).version(false)
+		.usage("\n" + App.Meta.Full + "\n\n" + 'USAGE: node $0 [options]')
+		.group('loglevel', 'Log').describe('loglevel', 'Log Level').default('loglevel', 'info')
+		.group('logpretty', 'Log').describe('logpretty', 'Log Pretty').boolean('logpretty').default('logpretty', true)
+		.describe('ip', 'Bind IP').default('ip', process.env.host || '0.0.0.0')
+		.describe('port', 'Backend Bind Port').default('port', process.env.PORT || 89)
+		.describe('port80', 'HTTP Bind Port').default('port80', 80)
+		.describe('port443', 'HTTPS Bind Port').default('port443', 443)
+		.describe('acme', 'ACME Endpoint').default('acme', 'letsencrypt-production')
+		.describe('private', 'Private IP').default('private', null)
+		.describe('public', 'Public IP').default('public', null).array('public')
+		.describe('admin', 'Admin IP').default('admin', null).array('admin')
+		.describe('datapath', 'Data Path').default('datapath', '/webgate')
+		.group('to', 'Proxy Map').describe('to', 'Map To').default('to', 'INFO').array('to')
+		.group('from', 'Proxy Map').describe('from', 'Map From').default('from', null).array('from')
+		.group('map', 'Proxy Map').describe('map', 'Map Text').array('map').default('map', null)
+		.group('mapfile', 'Proxy Map').describe('mapfile', 'Map File').array('mapfile').default('mapfile', null)
+		.demandOption([]);
 
-//
+	const AppArgs = App.Argy.argv;
+	App.Args = AppArgs;
+	App.Port = AppArgs.port;
+	App.IP = AppArgs.ip;
+	App.AdminIP = AppArgs.admin;
+	App.PublicIP = AppArgs.public;
+	App.PrivateIP = AppArgs.private;
+	App.DataPath = AppArgs.datapath;
+	if (App.Args.map || App.Args.mapfile) { App.Args.to = ['MAP']; }
 
-const AppArgs = AppArgy.argv;
-const App = {
-	Meta: AppMeta,
-	Args: AppArgs,
-	Port: AppArgs.port,
-	IP: AppArgs.ip,
-	AdminIP: AppArgs.admin,
-	PublicIP: AppArgs.public,
-	PrivateIP: AppArgs.private,
-	DataPath: AppArgs.datapath,
-}
+	console.log(App.AdminIP);
 
-//
-
-App.Exit = function (z, data) {
-	let exit = { code: 0, error: false, silent: false, message: 'App.Exit' };
-	if (z && z.stack) { exit.error = z; exit.code = 1; exit.msg = 'App.Exit ' + chalk.white(z.message); z.message = exit.msg; LOG.ERROR(z); LOG.ERROR(exit.msg, _.merge({ ExitCode: exit.code }, data)); }
-	else { if (Number.isInteger(z)) { exit.code = z; } else if (typeof (z) == 'string') { exit.message = 'App.Exit ' + chalk.white(z); } else if (z) { exit = z; } if (!exit.error) { delete exit.error; } if (!exit.silent) { LOG.DEBUG(exit.message, _.merge(exit, data)); } }
-	process.exit(exit.code);
-}
-
-App.InfoDB = {}; App.Info = function (id) { let z = App.InfoDB[id]; if (!z) { return z; } else { return z.Type == 'FX' ? z.Value() : z.Value; } };
-App.SetInfo = function (id, value) { if (typeof (value) == 'function') { return App.InfoDB[id] = { Type: 'FX', Value: value } } else { return App.InfoDB[id] = { Type: 'VALUE', Value: value } } };
-App.SetInfo('Node.Args', process.argv.join(' '));
-App.SetInfo('Node', require('os').hostname().toUpperCase() + ' : ' + process.pid + '/' + process.ppid + ' : ' + process.cwd() + ' : ' + process.version + ' : ' + require('os').version() + ' : ' + process.title);
-App.SetInfo('App', App.Meta.Full);
-
-App.LogPretty = false; if (App.Args.logpretty) { App.LogPretty = { colorize: true, singleLine: true, translateTime: 'SYS:yyyy-mm-dd|HH:MM:ss', ignore: 'hostname,pid', messageFormat: function (log, key, label) { let msg = log.msg ? log.msg : ''; let logout = chalk.gray(App.Meta.NameTag); if (msg != '') { logout += ' ' + msg }; return logout; } }; }
-App.Log = pino({ level: App.Args.loglevel, hooks: { logMethod: function (args, method) { if (args.length === 2) { args.reverse() } method.apply(this, args) } }, prettyPrint: App.LogPretty });
-const LOG = App.Log; LOG.TRACE = LOG.trace; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; LOG.FATAL = LOG.fatal;
-if (App.Args.debuglogger) { LOG.TRACE('TRACE'); LOG.DEBUG('DEBUG'); LOG.INFO('INFO'); LOG.WARN('WARN'); LOG.ERROR('ERROR'); LOG.FATAL('FATAL'); App.Exit({ silent: true }); }
-if (App.Args.debugargs) { console.log("\n"); console.log(App.Args); console.log("\n"); App.Exit({ silent: true }); };
-if (App.Args.help) { AppArg.showHelp('log'); console.log("\n" + App.Info('Node') + "\n"); App.Exit({ silent: true }); }
-if (App.Args.version) { console.log(App.Meta.Version); App.Exit({ silent: true }); }
-
-App.Log.SetLevel = function (level) {
-	LOG.level = level || 'trace';
-	if (LOG.level == 'fatal') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = NOP; LOG.ERROR = NOP; }
-	if (LOG.level == 'error') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = NOP; LOG.ERROR = LOG.error; }
-	if (LOG.level == 'warn') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = NOP; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
-	if (LOG.level == 'info') { LOG.TRACE = NOP; LOG.DEBUG = NOP; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
-	if (LOG.level == 'debug') { LOG.TRACE = NOP; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
-	if (LOG.level == 'trace') { LOG.TRACE = LOG.trace; LOG.DEBUG = LOG.debug; LOG.INFO = LOG.info; LOG.WARN = LOG.warn; LOG.ERROR = LOG.error; }
-	return LOG.level;
 }
 
 //
@@ -148,31 +115,28 @@ App.CronMinFX = function () {
 
 //
 
-App.Init = async function () {
-	process.onSIGTERM = function () { LOG.WARN('App.Process: SIGTERM'); App.Exit(1); };
+App.InitInfo = function () {
+	//console.log(App.Args);
+	App.SetInfo('App', function () {
+		return 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE')
+			+ ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY')
+			+ (App.Args.from && App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ') + (App.Args.to && App.Args.to[0] ? '> ' + App.Args.to.join(' ') + ' ' : '');
+	});
+}
 
-	if (App.Args.map || App.Args.mapfile) { App.Args.to = ['MAP']; }
-
-	App.SetInfo('App', function () { return 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE') + ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY') + (App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ') + (App.Args.to[0] ? '> ' + App.Args.to.join(' ') + ' ' : ''); });
-
-	LOG.TRACE({ App: App });
-	LOG.INFO(App.Meta.Full);
-	LOG.DEBUG('Node.Info: ' + chalk.white(App.Info('Node')));
-	LOG.DEBUG('Node.Args: ' + chalk.white(App.Info('Node.Args')));
-	LOG.DEBUG('App.Info: ' + chalk.white(App.Info('App')));
-
+App.Init = function () {
 	App.CronJob = cron.scheduleJob('*/2 * * * *', App.CronFX);
 	App.CronJobMin = cron.scheduleJob('*/1 * * * *', App.CronMinFX);
 
-	App.InitData();
+	//App.InitData();
+	//App.InitBackend();
 
-	await App.InitBackend();
 	App.InitMap();
 	App.InitKeys();
 	App.InitProxy();
 	App.InitServer();
 
-	App.InitDone();
+	//App.InitDone();
 }
 
 App.InitDone = function () {
@@ -780,4 +744,4 @@ App.Balancer = {
 
 //
 
-App.Init();
+App.Run();
