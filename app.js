@@ -30,7 +30,7 @@ const forge = require('node-forge'); forge.options.usePureJavaScript = true;
 
 //
 
-// const XT = require('/DEV/CODE/xtdev/node_modules/@cogsmith/xt');
+//const XT = require('/DEV/CODE/xtdev/node_modules/@cogsmith/xt');
 const XT = require('@cogsmith/xt');
 const LOG = XT.Log;
 const App = XT.App;
@@ -57,8 +57,8 @@ App.InitArgs = function () {
 		.group('mapfile', 'Proxy Map').describe('mapfile', 'Map File').array('mapfile').default('mapfile', null)
 		.demandOption([]);
 
-	const AppArgs = App.Argy.argv;
-	App.Args = AppArgs;
+	let AppArgs = App.Argy.argv;
+	App.Args = App.Argy.argv;
 	App.Port = AppArgs.port;
 	App.IP = AppArgs.ip;
 	App.AdminIP = AppArgs.admin;
@@ -70,12 +70,7 @@ App.InitArgs = function () {
 
 
 App.InitInfo = function () {
-	//if (!App.Args.to) { App.Args.to = []; }
-	console.log(App.Args);
 	App.SetInfo('App', function () {
-		console.log(App.Args);
-		App.Args = App.Argy.argv;
-		console.log(App.Args);
 		let info = 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE');
 		info += ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY');
 		info += (App.Args.from && App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ');
