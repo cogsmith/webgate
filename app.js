@@ -70,7 +70,8 @@ App.InitArgs = function () {
 
 
 App.InitInfo = function () {
-	//console.log(App.Args);
+	//if (!App.Args.to) { App.Args.to = []; }
+	console.log(App.Args);
 	App.SetInfo('App', function () {
 		return 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE')
 			+ ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY')
