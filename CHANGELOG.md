@@ -1,5 +1,21 @@
 <code>
 
+# [0.3.5](https://github.com/cogsmith/webgate/compare/0.3.5...main) @ [2021-04-26](https://github.com/cogsmith/webgate/releases/tag/0.3.5) 
+
+## DIFF
+- [33 COMMITS SINCE LAST TAG = 0.3.4](https://github.com/cogsmith/webgate/compare/0.3.4...0.3.5)
+
+## FEATURE
+- [#14: Add Target Modifier For IFRAME Wrapper](https://github.com/cogsmith/webgate/issues/14)
+
+## COMMIT
+- add iframe target = |
+
+</code>
+
+---
+<code>
+
 # [0.3.4](https://github.com/cogsmith/webgate/compare/0.3.4...main) @ [2021-04-14](https://github.com/cogsmith/webgate/releases/tag/0.3.4) 
 
 ## DIFF
