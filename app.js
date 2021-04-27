@@ -11,7 +11,6 @@ const tls = require('tls');
 const _ = require('lodash');
 const YAML = require('js-yaml');
 const glob = require('glob');
-const pino = require('pino');
 const chalk = require('chalk');
 const yargs = require('yargs/yargs');
 const axios = require('axios');
