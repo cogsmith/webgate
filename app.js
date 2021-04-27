@@ -68,6 +68,16 @@ App.InitArgs = function () {
 	if (App.Args.map || App.Args.mapfile) { App.Args.to = ['MAP']; }
 }
 
+
+App.InitInfo = function () {
+	//console.log(App.Args);
+	App.SetInfo('App', function () {
+		return 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE')
+			+ ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY')
+			+ (App.Args.from && App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ') + (App.Args.to && App.Args.to[0] ? '> ' + App.Args.to.join(' ') + ' ' : '');
+	});
+}
+
 //
 
 App.GetHostSlug = function (host) { if (!host) { return host; } let slug = host.replace(/\./g, '_').toUpperCase(); let z = slug.split('_'); if (z.length >= 3) { slug = z.slice(-2).join('_') + '_' + z.slice(0, z.length - 2).reverse().join('_'); }; return slug; };
@@ -102,17 +112,6 @@ App.CronFX = function () {
 App.CronMinFX = function () {
 	LOG.TRACE('App.CronMinFX');
 	App.CronFX();
-}
-
-//
-
-App.InitInfo = function () {
-	//console.log(App.Args);
-	App.SetInfo('App', function () {
-		return 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE')
-			+ ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY')
-			+ (App.Args.from && App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ') + (App.Args.to && App.Args.to[0] ? '> ' + App.Args.to.join(' ') + ' ' : '');
-	});
 }
 
 //
