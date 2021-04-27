@@ -1,5 +1,21 @@
 <code>
 
+# [0.3.6](https://github.com/cogsmith/webgate/compare/0.3.6...main) @ [2021-04-27](https://github.com/cogsmith/webgate/releases/tag/0.3.6) 
+
+## DIFF
+- [10 COMMITS SINCE LAST TAG = 0.3.5](https://github.com/cogsmith/webgate/compare/0.3.5...0.3.6)
+
+## DEV
+- [#11: Extract XT.App Library](https://github.com/cogsmith/webgate/issues/11)
+
+## COMMIT
+- Merge branch 'main' of https://github.com/cogsmith/webgate
+
+</code>
+
+---
+<code>
+
 # [0.3.5](https://github.com/cogsmith/webgate/compare/0.3.5...main) @ [2021-04-26](https://github.com/cogsmith/webgate/releases/tag/0.3.5) 
 
 ## DIFF
