@@ -73,9 +73,12 @@ App.InitInfo = function () {
 	//if (!App.Args.to) { App.Args.to = []; }
 	console.log(App.Args);
 	App.SetInfo('App', function () {
-		return 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE')
-			+ ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY')
-			+ (App.Args.from && App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ') + (App.Args.to && App.Args.to[0] ? '> ' + App.Args.to.join(' ') + ' ' : '');
+		console.log(App.Args);
+		let info = 'DATA = ' + App.DataPath + ' | ADMIN = ' + (App.AdminIP[0] ? App.AdminIP.join(' ') : 'NONE');
+		info += ' | PROXY = ' + App.IP + ' < ' + (App.PrivateIP ? App.PrivateIP : '?') + ' < ' + (App.PublicIP[0] ? App.PublicIP.join(' ') : 'ANY');
+		info += (App.Args.from && App.Args.from[0] ? ' : ' + App.Args.from.join(' ') + ' ' : ' : ALL ');
+		if (App.Args.to) { info += (App.Args.to && App.Args.to[0] ? '> ' + App.Args.to.join(' ') + ' ' : ''); }
+		return info;
 	});
 }
 
