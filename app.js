@@ -118,18 +118,13 @@ App.CronMinFX = function () {
 //
 
 App.Init = function () {
-	App.CronJob = cron.scheduleJob('*/2 * * * *', App.CronFX);
+	App.CronJob = cron.scheduleJob('*/10 * * * *', App.CronFX);
 	App.CronJobMin = cron.scheduleJob('*/1 * * * *', App.CronMinFX);
-
-	//App.InitData();
-	//App.InitBackend();
 
 	App.InitMap();
 	App.InitKeys();
 	App.InitProxy();
 	App.InitServer();
-
-	//App.InitDone();
 }
 
 //
