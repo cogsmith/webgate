@@ -1,12 +1,5 @@
-const NOP = function () { };
-process.setMaxListeners(999); require('events').EventEmitter.prototype._maxListeners = 999;
-process.on('uncaughtException', function (err) { console.log("\n"); console.log(err); console.log("\n"); process.exit(1); }); // throw(Error('ERROR'));
-process.onSIGTERM = function () { console.log('SIGTERM'); process.exit(); }; process.on('SIGTERM', function () { process.onSIGTERM(); });
-
 const util = require('util');
 const wait = util.promisify(setTimeout);
-
-//
 
 const path = require('path');
 const fs = require('fs');
@@ -37,7 +30,8 @@ const forge = require('node-forge'); forge.options.usePureJavaScript = true;
 
 //
 
-const XT = require('/DEV/CODE/xtdev/node_modules/@cogsmith/xt');
+// const XT = require('/DEV/CODE/xtdev/node_modules/@cogsmith/xt');
+const XT = require('@cogsmith/xt');
 const LOG = XT.Log;
 const App = XT.App;
 
@@ -72,9 +66,6 @@ App.InitArgs = function () {
 	App.PrivateIP = AppArgs.private;
 	App.DataPath = AppArgs.datapath;
 	if (App.Args.map || App.Args.mapfile) { App.Args.to = ['MAP']; }
-
-	console.log(App.AdminIP);
-
 }
 
 //
@@ -82,9 +73,9 @@ App.InitArgs = function () {
 App.GetHostSlug = function (host) { if (!host) { return host; } let slug = host.replace(/\./g, '_').toUpperCase(); let z = slug.split('_'); if (z.length >= 3) { slug = z.slice(-2).join('_') + '_' + z.slice(0, z.length - 2).reverse().join('_'); }; return slug; };
 App.GetSlugHost = function (slug) { if (!slug) { return slug; } let host = slug.split('/')[0].replace(/_/g, '.'); let path = slug.split('/').slice(1).join('/') || ''; let z = host.split('.'); if (z.length >= 2) { host = z.slice(2).reverse().join('.') + '.' + z.slice(0, 2).join('.'); }; return host + (path ? '/' + path : ''); }
 
-//
-
 App.GetDateString = function () { return new Date().toISOString().replace(/-/g, '').substr(0, 8); }
+
+//
 
 //App.StatsRandom = {};
 
@@ -124,6 +115,8 @@ App.InitInfo = function () {
 	});
 }
 
+//
+
 App.Init = function () {
 	App.CronJob = cron.scheduleJob('*/2 * * * *', App.CronFX);
 	App.CronJobMin = cron.scheduleJob('*/1 * * * *', App.CronMinFX);
@@ -139,9 +132,9 @@ App.Init = function () {
 	//App.InitDone();
 }
 
-App.InitDone = function () {
-	LOG.DEBUG('App.InitDone');
+//
 
+App.InitDone = function () {
 	if (true) {
 		if (!App.PublicIP[0] || (App.PublicIP[0] == 'SKIPDNS')) { LOG.WARN('ACME.Warning: With no MAP FROM entries found, and also no PublicIP set, every new host seen will generate certificate requests!!'); }
 		else { LOG.WARN('ACME.Warning: With no MAP FROM entries found, any host that resolves to your PublicIP will generate certificate requests: ' + App.PublicIP); }
@@ -153,14 +146,11 @@ App.InitDone = function () {
 //
 
 App.Main = function () {
-	LOG.DEBUG('App.Main');
 }
 
 //
 
 App.InitData = function () {
-	LOG.DEBUG('App.InitData');
-
 	App.Clients = {};
 	App.Server = {};
 
@@ -249,10 +239,6 @@ App.InitServer = async function () {
 //
 
 App.InitBackend = async function (cb) {
-	LOG.DEBUG('App.InitBackend');
-
-	//
-
 	App.BackendAdmin = { Endpoint: 'http://' + App.IP + ':' + '86', Fastify: fastify({ logger: App.Log, disableRequestLogging: true, maxParamLength: 999, ignoreTrailingSlash: false, }) };
 
 	let ffadmin = App.BackendAdmin.Fastify;
