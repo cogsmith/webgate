@@ -301,16 +301,7 @@ App.InitBackend = async function (cb) {
 
 	ff.log.infomute = ff.log.info; ff.log.info = ff.log.trace; ff.listen(89, '127.0.0.1', (err, address) => { ff.log.info = ff.log.infomute; if (err) { LOG.ERROR(err); } else { App.BackendStatus = 'UP'; } });
 
-	//
-
-	console.log();
-	console.log(App.Backend);
-	console.log(App.BackendAdmin);
-	console.log();
-
-	//
-
-	await wait(250);
+	// await wait(250);
 }
 
 //
@@ -526,12 +517,6 @@ App.ServerHander = function (req, res) {
 
 	console.log(logrow);
 	App.RequestLog.push(logrow);
-
-	console.log();
-	console.log(App.Backend);
-	console.log(App.BackendAdmin);
-	console.log();
-
 
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
