@@ -303,6 +303,13 @@ App.InitBackend = async function (cb) {
 
 	//
 
+	console.log();
+	console.log(App.Backend);
+	console.log(App.BackendAdmin);
+	console.log();
+
+	//
+
 	await wait(250);
 }
 
@@ -518,8 +525,13 @@ App.ServerHander = function (req, res) {
 	if (t != tfull) { logrow.TargetFull = tfull; }
 
 	console.log(logrow);
-
 	App.RequestLog.push(logrow);
+
+	console.log();
+	console.log(App.Backend);
+	console.log(App.BackendAdmin);
+	console.log();
+
 
 	if (t == 'ALL') { t = map.ALL; }
 	if (t == 'ELSE') { t = map.ELSE; }
