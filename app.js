@@ -29,8 +29,8 @@ const forge = require('node-forge'); forge.options.usePureJavaScript = true;
 
 //
 
-//const XT = require('/DEV/CODE/xtdev/node_modules/@cogsmith/xt');
-const XT = require('@cogsmith/xt');
+//const XT = require('/DEV/CODE/xtdev/node_modules/@cogsmith/xt').Init();
+const XT = require('@cogsmith/xt').Init();
 const LOG = XT.Log;
 const App = XT.App;
 
