@@ -20,7 +20,7 @@
     "start": "node app.js"
   },
   "dependencies": {
-    "@cogsmith/xt": "^1.0.24",
+    "@cogsmith/xt": "^1.0.25",
     "acme-client": "^4.1.3",
     "axios": "^0.21.1",
     "chalk": "^4.1.0",
