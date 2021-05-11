@@ -454,6 +454,8 @@ App.ServerHander = function (req, res) {
 	try { u = new URL(url); } catch (ex) { ttype = 'INVALID'; t = url; LOG.WARN('ServerHandler: URL_INVALID = ' + url); LOG.WARN(ex); }
 	try { uhost = u.host.toUpperCase(); } catch (ex) { }
 
+	// #1
+
 	if (map.ALL) { ttype = 'ALL'; t = 'ALL'; }
 
 	if (!t && map.WILDCARD) {
@@ -548,7 +550,7 @@ App.ServerHander = function (req, res) {
 		if (!t.includes(':')) { t = 'http://' + t };
 
 		let html = '';
-		html += "<html><head><style>body,iframe { border:0px;margin:0px;padding:0px;width:100%;height:100% }</style></head><body><iframe src='" + t + "'></iframe></body></html>"
+		html += "<html><head><style>html,body,iframe { border:0px;margin:0px;padding:0px;width:100%;height:100% }</style></head><body><iframe src='" + t + "'></iframe></body></html>"
 
 		res.end(html + "\n");
 	}
