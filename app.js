@@ -635,7 +635,7 @@ App.GetCert = function (domain) {
         LOG.INFO('GetCert.LoadFile: ' + domain);
         let expiration = Date.now() - 86400000; try { expiration = fs.statSync(App.DataPath + '/' + slug + '/keys/crt').birthtimeMs + (89 * 86400000); } catch (ex) { }
         if (expiration > Date.now()) { LOG.TRACE('GetCert.Expired: ' + domain); return false; }
-        LOG.DEBUG('GetCert.SetExpiration: ' + domain + ' = ' + Date.now() + ' : ' + expiration);
+        LOG.DEBUG('GetCert.ExpirationDate: ' + domain + ' = ' + fs.statSync(App.DataPath + '/' + slug + '/keys/crt').birthtime + ' +89 : ' + expiration + ' : NOW=' + Date.now());
         let key = undefined; try { key = fs.readFileSync(App.DataPath + '/' + slug + '/keys/key'); } catch (ex) { }
         let crt = undefined; try { crt = fs.readFileSync(App.DataPath + '/' + slug + '/keys/crt'); } catch (ex) { }
         let csr = undefined; try { csr = fs.readFileSync(App.DataPath + '/' + slug + '/keys/csr'); } catch (ex) { }
