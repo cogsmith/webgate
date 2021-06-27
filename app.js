@@ -675,13 +675,16 @@ App.MakeCert = function (domain) {
 App.RequestCert = function (domain, cb) {
     if (!cb) { cb = function () { } }
     domain = domain.toUpperCase(); let slug = App.GetHostSlug(domain);
+    console.log(App.CertReqs);
     if (App.CertReqs[domain]) {
         if (Date.now() > (App.CertReqs[domain].DT + (1000 * 60 * 15))) {
             LOG.INFO('RequestCert.Timeout: ' + domain);
-            App.CertReqs[domain] = false; delete App.CertReqs[domain];
+            App.CertReqs[domain] = false;
+            delete App.CertReqs[domain];
         }
         else {
-            LOG.TRACE('RequestCert.AlreadySent: ' + domain); cb(null, Error('SNI:BUSY'));
+            LOG.TRACE('RequestCert.AlreadySent: ' + domain);
+            cb(null, Error('SNI:BUSY'));
             return;
         }
     }
