@@ -624,7 +624,7 @@ App.GetCert = function (domain) {
     if (App.CertDB.Data[domain]) {
         let cert = App.CertDB.Data[domain];
         if (Date.now() > cert.Expiration) {
-            LOG.TRACE('GetCert.Expired: ' + domain);
+            LOG.TRACE('GetCert.Expired: ' + domain + ' @ ' + new Date(cert.Expiration));
             return false;
         }
         else {
@@ -648,10 +648,20 @@ App.GetCert = function (domain) {
 }
 
 App.WriteCert = function (slug, cert) {
+    LOG.TRACE('WriteCert: ' + slug);
     fs.mkdirSync(App.DataPath + '/' + slug + '/keys', { recursive: true });
-    if (cert.KEY) { fs.writeFileSync(App.DataPath + '/' + slug + '/keys/key', cert.KEY); }
-    if (cert.CRT) { fs.writeFileSync(App.DataPath + '/' + slug + '/keys/crt', cert.CRT); }
-    if (cert.CSR) { fs.writeFileSync(App.DataPath + '/' + slug + '/keys/csr', cert.CSR); }
+    if (cert.KEY) {
+        try { fs.rmSync(App.DataPath + '/' + slug + '/keys/key'); } catch (ex) { LOG.ERROR(ex); }
+        try { fs.writeFileSync(App.DataPath + '/' + slug + '/keys/key', cert.KEY); } catch (ex) { LOG.ERROR(ex); }
+    }
+    if (cert.CRT) {
+        try { fs.rmSync(App.DataPath + '/' + slug + '/keys/crt'); } catch (ex) { LOG.ERROR(ex); }
+        try { fs.writeFileSync(App.DataPath + '/' + slug + '/keys/crt', cert.CRT); } catch (ex) { LOG.ERROR(ex); }
+    }
+    if (cert.CSR) {
+        try { fs.rmSync(App.DataPath + '/' + slug + '/keys/csr'); } catch (ex) { LOG.ERROR(ex); }
+        try { fs.writeFileSync(App.DataPath + '/' + slug + '/keys/csr', cert.CSR); } catch (ex) { LOG.ERROR(ex); }
+    }
 }
 
 App.MakeCert = function (domain) {
