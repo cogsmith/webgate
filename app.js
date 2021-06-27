@@ -620,7 +620,7 @@ App.GetCert = function (domain) {
     if (domain == 'GATE.TEST') { domain = 'LOCALHOST'; }
     if (App.CertDB.Data[domain]) {
         let cert = App.CertDB.Data[domain];
-        if (cert.Expiration > Date.now()) {
+        if (Date.now() > cert.Expiration) {
             LOG.TRACE('GetCert.Expired: ' + domain);
             return false;
         }
@@ -633,7 +633,9 @@ App.GetCert = function (domain) {
         let slug = App.GetHostSlug(domain);
         if (!fs.existsSync(App.DataPath + '/' + slug + '/keys/key') || !fs.existsSync(App.DataPath + '/' + slug + '/keys/crt')) { LOG.DEBUG('GetCert.Missing: ' + domain); return false; }
         LOG.INFO('GetCert.LoadFile: ' + domain);
-        let expiration = new Date().getTime() + 86400000; try { expiration = fs.statSync(App.DataPath + '/' + slug + '/keys/key').birthtimeMs + (89 * 86400000); } catch (ex) { }
+        let expiration = Date.now() - 86400000; try { expiration = fs.statSync(App.DataPath + '/' + slug + '/keys/key').birthtimeMs + (89 * 86400000); } catch (ex) { }
+        if (cert.Expiration > Date.now()) { LOG.TRACE('GetCert.Expired: ' + domain); return false; }
+        LOG.DEBUG('GetCert.SetExpiration: ' + Date.now() + ' : ' + expiration);
         let key = undefined; try { key = fs.readFileSync(App.DataPath + '/' + slug + '/keys/key'); } catch (ex) { }
         let crt = undefined; try { crt = fs.readFileSync(App.DataPath + '/' + slug + '/keys/crt'); } catch (ex) { }
         let csr = undefined; try { csr = fs.readFileSync(App.DataPath + '/' + slug + '/keys/csr'); } catch (ex) { }
