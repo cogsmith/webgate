@@ -589,6 +589,9 @@ App.SNI = function (host, cb) {
     LOG.TRACE('SNI: ' + host);
     if (App.PublicIP.includes(host) || (host == 'LOCALHOST') || (host == App.PrivateIP) || (host == App.IP)) { cb(null, App.GetCert('LOCALHOST').Context); return; }
 
+    if (host.includes('COGSMITH.COM')) { }
+    else { return; }
+
     let cert = App.GetCert(host);
     if (cert) { cb(null, cert.Context); return; }
     else if (!App.Map[host] && (!host.startsWith('WWW.') || (host.startsWith('WWW.') && !App.Map[host.substr(4)]))) { LOG.DEBUG('SNI.Deny: ' + host + ' Not Listed In Routing Map'); cb(null, Error('SNI:NOMAP')); return; }
