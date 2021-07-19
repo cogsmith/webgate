@@ -542,7 +542,7 @@ App.ServerHander = function (req, res) {
         t = t.substring(1);
         if (!t.includes(':')) { t = 'http://' + t };
         let zurl = new URL(t);
-        let loc = zurl.href + zurl.search;
+        let loc = zurl.href + u.search;
         res.writeHead(302, { Location: loc });
         res.end(loc + "\n");
     }
