@@ -541,7 +541,8 @@ App.ServerHander = function (req, res) {
     else if (t && t.startsWith('>')) {
         t = t.substring(1);
         if (!t.includes(':')) { t = 'http://' + t };
-        let loc = new URL(t).href;
+        let zurl = new URL(t);
+        let loc = zurl.href + zurl.search;
         res.writeHead(302, { Location: loc });
         res.end(loc + "\n");
     }
